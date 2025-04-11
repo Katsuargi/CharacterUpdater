@@ -211,6 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			const nextCost = 100 + bonus * 10;
 			costDisplay.textContent = `Next Bonus Progression Cost: ${nextCost} XP`;
 		}
+		
+		// Ensure skill options are refreshed for new dropdowns (without wiping existing selections)
+		updateSkillOptions({ preserveExisting: true });
 	}
 	
 	function handleBoughtRitualChange() {
@@ -516,22 +519,33 @@ function updateRitualOptions(path) {
     });
 }
 
-function updateSkillOptions() {
-    const excludedIds = ['thinBloodSkillSelect', 'halfBloodSkillSelect1', 'halfBloodSkillSelect2', 'lineageSkillSelect', 'secondLineageSkillSelect'];
-    console.log("Excluded IDs:", excludedIds); // Debug: Log excluded IDs
+function updateSkillOptions({ preserveExisting = false } = {}) {
+    const excludedIds = [
+        'thinBloodSkillSelect',
+        'halfBloodSkillSelect1',
+        'halfBloodSkillSelect2',
+        'lineageSkillSelect',
+        'secondLineageSkillSelect',
+    ];
+    console.log("Excluded IDs:", excludedIds);
 
     const selectedClass = document.getElementById('classSelect').value;
     const skillTreeNames = classes[selectedClass]?.skillTrees || [];
     const skillSelectElements = Array.from(document.getElementsByClassName('skillSelect'));
 
-    console.log("Skill Select Elements Found:", skillSelectElements.map(select => select.id)); // Debug: Log all found select elements IDs
+    console.log("Skill Select Elements Found:", skillSelectElements.map(select => select.id));
 
     skillSelectElements.forEach(select => {
-        console.log("Checking select:", select.id); // Debug: Log each select being checked
+        console.log("Checking select:", select.id);
 
         if (!excludedIds.includes(select.id)) {
-            console.log("Updating:", select.id); // Debug: Confirm which are being updated
-            select.innerHTML = ''; // Clear existing options
+            if (preserveExisting && select.value) {
+                console.log(`Preserving existing value for ${select.id}: ${select.value}`);
+                return;
+            }
+
+            console.log("Updating:", select.id);
+            select.innerHTML = '';
 
             const defaultOption = document.createElement('option');
             defaultOption.textContent = "Choose skill?";
@@ -549,7 +563,7 @@ function updateSkillOptions() {
                 });
             });
         } else {
-            console.log("Excluded from update:", select.id); // Debug: Confirm which are excluded
+            console.log("Excluded from update:", select.id);
         }
     });
 }
