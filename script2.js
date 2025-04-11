@@ -210,6 +210,56 @@ document.addEventListener('DOMContentLoaded', function() {
 			costDisplay.textContent = `Next Bonus Progression Cost: ${nextCost} XP`;
 		}
 	}
+	
+	function handleBoughtRitualChange() {
+    const boughtRitualSelect = document.getElementById('boughtRitualCount');
+    const count = parseInt(boughtRitualSelect?.value || 0);
+    const container = document.getElementById('boughtRitualContainer');
+
+    if (!container) {
+        console.error('Container for bought rituals not found.');
+        return;
+    }
+
+    const selectedClass = document.getElementById('classSelect')?.value;
+    const path = classes[selectedClass]?.path || '';
+    const pathRituals = rituals[path] || [];
+    const fusedRituals = rituals['Fused'] || [];
+    const fullRitualList = [...pathRituals, ...fusedRituals];
+
+    // Store previous selections
+    const previousSelections = Array.from(container.querySelectorAll('select')).map(select => select.value);
+
+    // Clear the container
+    container.innerHTML = '';
+
+    for (let i = 0; i < count; i++) {
+        const select = document.createElement('select');
+        select.name = `boughtRitual${i}`;
+        select.id = `boughtRitual${i}`;
+        select.className = 'ritualSelect';
+
+        const defaultOption = document.createElement('option');
+        defaultOption.text = 'Choose Ritual';
+        defaultOption.value = '';
+        defaultOption.disabled = true;
+        select.appendChild(defaultOption);
+
+        fullRitualList.forEach(ritual => {
+            const option = document.createElement('option');
+            option.value = ritual;
+            option.textContent = ritual;
+            select.appendChild(option);
+        });
+
+        // Only re-apply if it’s still valid in this class’s options
+        if (previousSelections[i] && fullRitualList.includes(previousSelections[i])) {
+            select.value = previousSelections[i];
+        }
+
+        container.appendChild(select);
+    }
+}
 
 // Add event listener for character backgrounds
 // Add event listeners for both backgrounds
