@@ -257,11 +257,6 @@
 			<select id="lineageSkillSelect" class="skillSelect" name="lineageSkillSelect">
 				<option value="">Select Skill</option>
 			</select>
-
-			<label for="secondLineageSkillSelect">Second Lineage Skills:</label>
-			<select id="secondLineageSkillSelect" class="skillSelect" name="secondLineageSkillSelect">
-				<option value="">Select Skill</option>
-			</select>
 			
 			<label for="diety">Which Diety do you follow?:</label>
 				<select id="diety" name="diety">
@@ -312,52 +307,6 @@
 				<!-- Button to add new pairs -->
 				<button type="button" onclick="addOrganization()">Add Organization</button>
 			</div>
-
-			<script>
-				let organizationCount = 1;
-
-				function addOrganization() {
-					organizationCount++;
-					const newOrganizationHTML = `
-						<div id="organizationPair${organizationCount}">
-							<label for="organizationSelect${organizationCount}">Select Organization:</label>
-							<select id="organizationSelect${organizationCount}" name="organizationSelect${organizationCount}">
-								<option value="">Select Organization</option>
-								<option value="Academy of Innovation">Academy of Innovation</option>
-								<option value="Crafter's Guild">Crafter's Guild</option>
-								<option value="Crowd">Crowd</option>
-								<option value="Daihonsha">Daihonsha</option>
-								<option value="Daylight Alliance">Daylight Alliance</option>
-								<option value="Diamond Assembly">Diamond Assembly</option>
-								<option value="Guild of Wind and Flame">Guild of Wind and Flame</option>
-								<option value="Hidden Court">Hidden Court*</option>
-								<option value="Jin Shi">Jin Shi*</option>
-								<option value="Merchant's Guild">Merchant's Guild</option>
-								<option value="Royal Academy">Royal Academy</option>
-								<option value="Sentries">Sentries*</option>
-								<option value="Sultan's Court">Sultan's Court</option>
-								<option value="Temple">Temple</option>
-								<option value="Thieve's Guild">Thieve's Guild</option>
-								<!-- More organizations -->
-							</select>
-
-							<label for="rankInput${organizationCount}">Rank:</label>
-							<input type="number" id="rankInput${organizationCount}" name="rankInput${organizationCount}" min="1" max="3">
-
-							<button type="button" onclick="removeOrganization(${organizationCount})">Remove</button>
-						</div>
-					`;
-					const organizationSection = document.getElementById('organizationSection');
-					organizationSection.insertAdjacentHTML('beforeend', newOrganizationHTML);
-				}
-
-				function removeOrganization(id) {
-					const orgPair = document.getElementById(`organizationPair${id}`);
-					if (orgPair) {
-						orgPair.remove();
-					}
-				}
-			</script>
 			
 			<div id="craftSection">
 				<label for="craftSelect1">Select Crafts:</label>
@@ -384,48 +333,6 @@
 				<!-- Button to add new pairs -->
 				<button type="button" onclick="addCraft()">Add Craft</button>
 			</div>
-
-			<script>
-				let craftCount = 1;
-
-				function addCraft() {
-					craftCount++;
-					const newCraftHTML = `
-						<div id="craftPair${craftCount}">
-							<label for="craftSelect${craftCount}">Select Craft:</label>
-							<select id="craftSelect${craftCount}" name="craftSelect${craftCount}">
-								<option value="">Select Craft</option>
-								<option value="Alchemy">Alchemy</option>
-								<option value="Artificing">Artificing</option>
-								<option value="Caligraphy">Caligraphy</option>
-								<option value="Clothier">Clothier</option>
-								<option value="Cooking">Cooking</option>
-								<option value="Courtesan">Courtesan</option>
-								<option value="Droving">Droving</option>
-								<option value="Jewelrysmithing">Jewlrysmithing</option>
-								<option value="Runecrafting">Runecrafting</option>
-								<option value="Smithing">Smithing</option>
-								<option value="Tattooing">Tattooing</option>
-								<option value="Wandmaking">Wandmaking</option>
-							</select>
-
-							<label for="rankInput${craftCount}">Rank:</label>
-							<input type="number" id="rankInput${craftCount}" name="rankInput${craftCount}" min="1" max="4">
-
-							<button type="button" onclick="removeCraft(${craftCount})">Remove</button>
-						</div>
-					`;
-					const craftSection = document.getElementById('craftSection');
-					craftSection.insertAdjacentHTML('beforeend', newCraftHTML);
-				}
-
-				function removeCraft(id) {
-					const craftPair = document.getElementById(`craftPair${id}`);
-					if (craftPair) {
-						craftPair.remove();
-					}
-				}
-			</script>
 			
 			<label for="knowledges">Knowledges (3 per rank of knowledge, or 1 if taking rank 1):</label>
             <input type="text" id="knowledges" name="knowledges" required>

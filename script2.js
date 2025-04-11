@@ -3,6 +3,8 @@ var prevHalfBloodChecked = false;
 var prevThinBloodChecked = false;
 let bonusSelect;
 let earnedSelect;
+let organizationCount = 1;
+let craftCount = 1;
 
 const elementOpposites = {
     Fire: 'Water',
@@ -825,14 +827,25 @@ function submitCharacterForm() {
     data += `boughtRitualCount: ${document.getElementById('boughtRitualCount')?.value || '0'}\n`;
 
     // Basic form fields
-    Array.from(form.elements).forEach(element => {
-        if (element.name && element.type !== 'submit') {
-            let value = element.type === 'checkbox' ? (element.checked ? 'Yes' : 'No') : element.value;
-            if (!invalidValues.includes(value)) {
-                data += `${element.name}: ${value}\n`;
-            }
-        }
-    });
+	Array.from(form.elements).forEach(element => {
+		if (element.name && element.type !== 'submit') {
+			let value = element.type === 'checkbox' ? (element.checked ? 'Yes' : 'No') : element.value;
+			if (!invalidValues.includes(value)) {
+				let name = element.name;
+
+				// Fix rank naming conflicts
+				if (name.startsWith('rankInput')) {
+					if (element.id.startsWith('craftRankInput')) {
+						name = element.id;
+					} else if (element.id.startsWith('orgRankInput')) {
+						name = element.id;
+					}
+				}
+
+				data += `${name}: ${value}\n`;
+			}
+		}
+	});
 
     // All skill dropdowns
     document.querySelectorAll('.skillSelect, .skillSelect2').forEach(select => {
@@ -957,6 +970,85 @@ function appendSkillDetails(data, details, selectedElement) {
     return data;
 }
 
+function addOrganization() {
+    organizationCount++;
+    const newOrganizationHTML = `
+        <div id="organizationPair${organizationCount}">
+            <label for="organizationSelect${organizationCount}">Select Organization:</label>
+            <select id="organizationSelect${organizationCount}" name="organizationSelect${organizationCount}">
+                <option value="">Select Organization</option>
+                <option value="Academy of Innovation">Academy of Innovation</option>
+                <option value="Crafter's Guild">Crafter's Guild</option>
+                <option value="Crowd">Crowd</option>
+                <option value="Daihonsha">Daihonsha</option>
+                <option value="Daylight Alliance">Daylight Alliance</option>
+                <option value="Diamond Assembly">Diamond Assembly</option>
+                <option value="Guild of Wind and Flame">Guild of Wind and Flame</option>
+                <option value="Hidden Court">Hidden Court*</option>
+                <option value="Jin Shi">Jin Shi*</option>
+                <option value="Merchant's Guild">Merchant's Guild</option>
+                <option value="Royal Academy">Royal Academy</option>
+                <option value="Sentries">Sentries*</option>
+                <option value="Sultan's Court">Sultan's Court</option>
+                <option value="Temple">Temple</option>
+                <option value="Thieve's Guild">Thieve's Guild</option>
+            </select>
+
+            <label for="orgRankInput${organizationCount}">Rank:</label>
+            <input type="number" id="orgRankInput${organizationCount}" name="orgRankInput${organizationCount}" min="1" max="3">
+
+            <button type="button" onclick="removeOrganization(${organizationCount})">Remove</button>
+        </div>
+    `;
+    const organizationSection = document.getElementById('organizationSection');
+    organizationSection.insertAdjacentHTML('beforeend', newOrganizationHTML);
+}
+
+function removeOrganization(id) {
+    const orgPair = document.getElementById(`organizationPair${id}`);
+    if (orgPair) {
+        orgPair.remove();
+    }
+}
+
+function addCraft() {
+    craftCount++;
+    const newCraftHTML = `
+        <div id="craftPair${craftCount}">
+            <label for="craftSelect${craftCount}">Select Craft:</label>
+            <select id="craftSelect${craftCount}" name="craftSelect${craftCount}">
+                <option value="">Select Craft</option>
+                <option value="Alchemy">Alchemy</option>
+                <option value="Artificing">Artificing</option>
+                <option value="Caligraphy">Caligraphy</option>
+                <option value="Clothier">Clothier</option>
+                <option value="Cooking">Cooking</option>
+                <option value="Courtesan">Courtesan</option>
+                <option value="Droving">Droving</option>
+                <option value="Jewelrysmithing">Jewlrysmithing</option>
+                <option value="Runecrafting">Runecrafting</option>
+                <option value="Smithing">Smithing</option>
+                <option value="Tattooing">Tattooing</option>
+                <option value="Wandmaking">Wandmaking</option>
+            </select>
+
+            <label for="craftRankInput${craftCount}">Rank:</label>
+            <input type="number" id="craftRankInput${craftCount}" name="craftRankInput${craftCount}" min="1" max="4">
+
+            <button type="button" onclick="removeCraft(${craftCount})">Remove</button>
+        </div>
+    `;
+    const craftSection = document.getElementById('craftSection');
+    craftSection.insertAdjacentHTML('beforeend', newCraftHTML);
+}
+
+function removeCraft(id) {
+    const craftPair = document.getElementById(`craftPair${id}`);
+    if (craftPair) {
+        craftPair.remove();
+    }
+}
+
 function downloadToFile(content, filename, contentType) {
     const a = document.createElement('a');
     const file = new Blob([content], { type: contentType });
@@ -1029,8 +1121,6 @@ function applyCharacterData(charData) {
                     if (el) {
                         el.value = charData[id];
                         el.dispatchEvent(new Event('change'));
-
-                        // NEW: Manually simulate what a user would do
                         logSkillDetailsAndPopulateOptions({ target: el });
                     }
                 }
@@ -1054,7 +1144,7 @@ function applyCharacterData(charData) {
         }, 50);
     }
 
-    // Handle skill options AFTER the skills are added and dropdowns generated
+    // Handle skill options AFTER skill selects are populated
     Object.entries(charData).forEach(([key, value]) => {
         if (key.startsWith('skillSelect')) {
             const el = document.getElementById(key);
@@ -1062,7 +1152,7 @@ function applyCharacterData(charData) {
                 setTimeout(() => {
                     el.value = value;
                     el.dispatchEvent(new Event('change'));
-                    logSkillDetailsAndPopulateOptions({ target: el }); // 💥 Ensures dropdowns get built
+                    logSkillDetailsAndPopulateOptions({ target: el });
                 }, 50);
             }
         }
@@ -1077,6 +1167,41 @@ function applyCharacterData(charData) {
                 }
             };
             setTimeout(trySet, 100);
+        }
+    });
+
+    // Handle org/craft select dropdowns and associated ranks
+    Object.entries(charData).forEach(([key, value]) => {
+        // Organization dropdowns
+        if (key.startsWith("organizationSelect")) {
+            const index = parseInt(key.replace("organizationSelect", ""));
+            while (organizationCount < index) {
+                addOrganization();
+            }
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
+
+        // Craft dropdowns
+        if (key.startsWith("craftSelect")) {
+            const index = parseInt(key.replace("craftSelect", ""));
+            while (craftCount < index) {
+                addCraft();
+            }
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
+
+        // Organization ranks
+        if (key.startsWith("orgRankInput")) {
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
+
+        // Craft ranks
+        if (key.startsWith("craftRankInput")) {
+            const el = document.getElementById(key);
+            if (el) el.value = value;
         }
     });
 
