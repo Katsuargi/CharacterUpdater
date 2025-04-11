@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Builder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<h2>Load Saved Character</h2>
+		<input type="file" id="charFile" accept=".txt">
+		<button type="button" onclick="loadFromFile()">Load Character File</button>
+    <div class="container">
+        <h1>Character Builder Form</h1>
+		<h1>Anything marked with a star requires Org approval</h1>
+        <form id="characterForm">
+            <label for="playerName">Player Name:</label>
+            <input type="text" id="playerName" name="playerName" required>
+
+            <label for="playerEmail">Player Email:</label>
+            <input type="email" id="playerEmail" name="playerEmail" required>
+
+            <label for="playerPronouns">Player Pronouns:</label>
+            <input type="text" id="playerPronouns" name="playerPronouns" required>
+
+            <div class="gap"></div>
+
+            <label for="characterName">Character Name:</label>
+            <input type="text" id="characterName" name="characterName" required>
+			
+			<label for="bonusProgressionCount">Bonus Progression:</label>
+			<select id="bonusProgressionCount"></select>
+			
+			<p id="nextBonusProgressionCost">Next Bonus Progression Cost: 100 XP</p>
+
+			<label for="earnedProgressionCount">Earned Progression:</label>
+			<select id="earnedProgressionCount"></select>
+            
+			<label for="characterLineage">Character Lineage:</label>
+				<select id="characterLineage" name="characterLineage" required onchange="updateLineageOptions()">
+					<option value="">Select Lineage</option>
+					<option value="Aetherite">Aetherite</option>
+					<option value="Celestine">Celestine</option>
+					<option value="Construct">Construct</option>
+					<option value="Dhampir">Dhampir</option>
+					<option value="Dragonkin">Dragonkin</option>
+					<option value="Hill Dwarf">Hill Dwarf</option>
+					<option value="Mountain Dwarf">Mountain Dwarf</option>
+					<option value="Dusk Elf">Dusk Elf</option>
+					<option value="Moon Elf">Moon Elf</option>
+					<option value="Sun Elf">Sun Elf</option>
+					<option value="Fellblooded">Fellblooded</option>
+					<option value="Feytouched">Feytouched</option>
+					<option value="Formian">Formian</option>
+					<option value="Gnoll">Gnoll</option>
+					<option value="Hiwani">Hiwani</option>
+					<option value="Low Human">Low Human</option>
+					<option value="High Human">High Human</option>
+					<option value="Orc">Orc</option>
+					<option value="Sah'jann">Sah'jann</option>
+					<option value="Shar'vin">Shar'vin</option>
+					<option value="Stoneborn">Stoneborn</option>
+					<option value="Waterborn">Waterborn</option>
+				</select>
+				
+			<label for="characterStanding">Character Standing:</label>
+				<select id="characterStanding" name="characterStanding">
+					<option value="">Select Standing</option>
+					<option value="Highborn">Highborn*</option>
+					<option value="Ordinary">Ordinary</option>
+					<option value="Foreigner">Foreigner</option>
+					<option value="Street Rat">Street Rat</option>
+					<option value="Slave">Slave*</option>
+					<option value="Wildborn">Wildborn</option>
+				</select>
+				
+			<label for="characterBackground">Character Background:</label>
+				<select id="characterBackground" name="characterBackground">
+					<option value="">Select Standing</option>
+					<option value="Clerk1">Clerk(Knowledge Records)</option>
+					<option value="Clerk2">Clerk(+5bp, Craft Caligraphy)</option>
+					<option value="Crafter">Crafter</option>
+					<option value="Dark Past">Dark Past*</option>
+					<option value="Diplomat1">Diplomat(Knowledge Diplomacy)</option>
+					<option value="Diplomat2">Diplomat(+5bp, Craft Courtesan)</option>
+					<option value="Eerie">Eerie*</option>
+					<option value="Entertainer">Entertainer</option>
+					<option value="Farmer1">Farmer(Knowledge: Farming)</option>
+					<option value="Farmer2">Farmer(+5bp Craft Droving)</option>
+					<option value="Healer">Healer</option>
+					<option value="Hermit1">Hermit(Knowledge(place of isolation))</option>
+					<option value="Hermit2">Hermit(Tracker)</option>
+					<option value="Learned">Learned</option>
+					<option value="Martial">Martial</option>
+					<option value="Merchant">Merchant</option>
+					<option value="Mystery">Mystery*</option>
+					<option value="Sailor">Sailor</option>
+					<option value="Thief">Thief*</option>
+					<option value="Traveler">Traveler</option>
+					<option value="Unusual">Unusual</option>
+				</select>
+				
+			<label for="characterBackground2">Character Background 2:</label>
+				<select id="characterBackground2" name="characterBackground2">
+					<option value="">Select Standing</option>
+					<option value="Clerk1">Clerk(Knowledge Records)</option>
+					<option value="Clerk2">Clerk(+5bp, Craft Caligraphy)</option>
+					<option value="Crafter">Crafter</option>
+					<option value="Dark Past">Dark Past*</option>
+					<option value="Diplomat1">Diplomat(Knowledge Diplomacy)</option>
+					<option value="Diplomat2">Diplomat(+5bp, Craft Courtesan)</option>
+					<option value="Eerie">Eerie*</option>
+					<option value="Entertainer">Entertainer</option>
+					<option value="Farmer1">Farmer(Knowledge: Farming)</option>
+					<option value="Farmer2">Farmer(+5bp Craft Droving)</option>
+					<option value="Healer">Healer</option>
+					<option value="Hermit1">Hermit(Knowledge(place of isolation))</option>
+					<option value="Hermit2">Hermit(Tracker)</option>
+					<option value="Learned">Learned</option>
+					<option value="Martial">Martial</option>
+					<option value="Merchant">Merchant</option>
+					<option value="Mystery">Mystery*</option>
+					<option value="Sailor">Sailor</option>
+					<option value="Thief">Thief*</option>
+					<option value="Traveler">Traveler</option>
+					<option value="Unusual">Unusual</option>
+				</select>
+				
+				<label for="halfBloodCheckbox">Half Blood:</label>
+					<input type="checkbox" id="halfBloodCheckbox" name="halfBloodCheckbox" onchange="updateLineageOptions()">
+					
+				<label for="thinBloodCheckbox">Thin Blood:</label>
+					<input type="checkbox" id="thinBloodCheckbox" name="thinBloodCheckbox" onchange="updateLineageOptions()">
+				
+			<div id="secondLineage" style="display:none;">
+				<label for="secondLineageSelect">Second Lineage:</label>
+					<select id="secondLineageSelect" name="secondLineage" onchange="updateLineageOptions()">
+						<option value=""></option>
+						<option value="Aetherite">Aetherite</option>
+						<option value="Celestine">Celestine</option>
+						<option value="Construct">Construct</option>
+						<option value="Dhampir">Dhampir</option>
+						<option value="Dragonkin">Dragonkin</option>
+						<!-- other options -->
+						<option value="Hill Dwarf">Hill Dwarf</option>
+						<option value="Mountain Dwarf">Mountain Dwarf</option>
+						<option value="Dusk Elf">Dusk Elf</option>
+						<option value="Moon Elf">Moon Elf</option>
+						<option value="Sun Elf">Sun Elf</option>
+						<option value="Fellblooded">Fellblooded</option>
+						<option value="Feytouched">Feytouched</option>
+						<option value="Formian">Formian</option>
+						<option value="Gnoll">Gnoll</option>
+						<option value="Hiwani">Hiwani</option>
+						<option value="Low Human">Low Human</option>
+						<option value="High Human">High Human</option>
+						<option value="Orc">Orc</option>
+						<option value="Sah'jann">Sah'jann</option>
+						<option value="Shar'vin">Shar'vin</option>
+						<option value="Stoneborn">Stoneborn</option>
+						<option value="Waterborn">Waterborn</option>
+					</select>
+			</div>
+
+			<!-- Conditional fields -->
+			<div id="elementSelection" style="display:none;">
+				<label for="element">Element:</label>
+				<select id="element" name="element">
+				<option value=""></option>
+					<option value="Fire">Fire</option>
+					<option value="Water">Water</option>
+					<option value="Earth">Earth</option>
+					<option value="Air">Air</option>
+				</select>
+			</div>
+
+			<div id="courtSelection" style="display:none;">
+				<label for="court">Court:</label>
+				<select id="court" name="court">
+					<option value=""></option>
+					<option value="Moonstone">Moonstone</option>
+					<option value="Lapis">Lapis</option>
+					<option value="Jade">Jade</option>
+					<option value="Jasper">Jasper</option>
+					<option value="Hematite">Hematite</option>
+					<option value="Quartz">Quartz</option>
+				</select>
+			</div>
+			
+			<label for="classSelect">Class:</label>
+				<select id="classSelect" name="classSelect" onchange="updateClassDetails(); updateSkillOptions();">
+					<option value="">Select Class</option>
+					<option value="Tactician">Tactician</option>
+					<option value="Battlemage">Battlemage</option>
+					<option value="Oathbound">Oathbound</option>
+					<option value="Shapeshifter">Shapeshifter</option>
+					<option value="Adept">Adept</option>
+					<option value="Chirurgeon">Chirurgeon</option>
+					<option value="Soultender">Soultender</option>
+					<option value="Cleric">Cleric</option>
+					<option value="Animist">Animist</option>
+					<option value="Mender">Mender</option>
+					<option value="MoA">Master of Arms</option>
+					<option value="Evoker">Evoker</option>
+					<option value="Dervish">Dervish</option>
+					<option value="Scout">Scout</option>
+					<option value="Mindblade">Mindblade</option>
+					<option value="Rogue">Rogue</option>
+					<option value="Illusionist">Illusionist</option>
+					<option value="Chaplain">Chaplain</option>
+					<option value="Shaman">Shaman</option>
+					<option value="Etherealist">Etherealist</option>
+				</select>
+				
+			<label for="skillSelect1">Skill 1:</label>
+				<select id="skillSelect1" class="skillSelect" name="skillSelect1"></select>
+
+				<label for="skillSelect2">Skill 2:</label>
+				<select id="skillSelect2" class="skillSelect" name="skillSelect2"></select>
+
+				<label for="skillSelect3">Skill 3:</label>
+				<select id="skillSelect3" class="skillSelect" name="skillSelect3"></select>
+				
+				    <!-- Container for dynamically generated skill selection dropdowns -->
+			<lable for="bonusSkillSelectContainer">Bonus Prog Spends:</lable>
+			<div id="bonusSkillSelectContainer"></div>
+				
+				
+			<label for="optionsContainer">Skill options: Including cases where only a single "option" is given (for skills like Combat Mastery or Talented Scout):</label>
+			<div id="optionsContainer"></div>
+
+				
+				<!-- Additional Dropdowns for Thin Blood and Half Blood selections -->
+			<div id="thinBloodSelection" style="display:none;">
+				<label for="thinBloodSkillSelect">Select One Skill (Thin Blood):</label>
+				<select id="thinBloodSkillSelect" class="skillSelect" name="thinBloodSkill">
+					<option value="N/A">N/A</option>
+				</select>
+			</div>
+
+			<div id="halfBloodSelection1" style="display:none;">
+				<label for="halfBloodSkillSelect1">Select First Skill (Half Blood):</label>
+				<select id="halfBloodSkillSelect1" class="skillSelect" name="halfBloodSkill">
+					<option value="N/A">N/A</option>
+				</select>
+			</div>
+
+			<div id="halfBloodSelection2" style="display:none;">
+				<label for="halfBloodSkillSelect2">Select Second Skill (Half Blood):</label>
+				<select id="halfBloodSkillSelect2" class="skillSelect" name="halfBloodSkill2">
+					<option value="N/A">N/A</option>
+				</select>
+			</div>
+			
+			<!-- Add this inside your form structure -->
+			<label for="lineageSkillSelect">Lineage Skills:</label>
+			<select id="lineageSkillSelect" class="skillSelect" name="lineageSkillSelect">
+				<option value="">Select Skill</option>
+			</select>
+
+			<label for="secondLineageSkillSelect">Second Lineage Skills:</label>
+			<select id="secondLineageSkillSelect" class="skillSelect" name="secondLineageSkillSelect">
+				<option value="">Select Skill</option>
+			</select>
+			
+			<label for="diety">Which Diety do you follow?:</label>
+				<select id="diety" name="diety">
+					<option value="">Select Diety</option>
+					<option value="Brothers">The Brothers</option>
+					<option value="Gloriel">Gloriel</option>
+					<option value="Nivone">Nivone</option>
+					<option value="Auran">Auran</option>
+					<option value="Avahlei">Avahlei</option>
+					<option value="Kora">Kora</option>
+					<option value="Laurela">Laurela</option>
+					<option value="Lyla">Lyla</option>
+					<option value="Maenir">Maenir</option>
+					<option value="Noctis">Noctis*</option>
+					<option value="Suhl'Sekh">Suhl'Sekh</option>
+					<option value="Thul">Thul</option>
+					<option value="Gorgath">Gorgath*</option>
+					<option value="Sulith">Sulith*</option>
+					<option value="Twins">Twins*</option>
+					<option value="Other">Other</option>
+				</select>
+			
+			<div id="organizationSection">
+				<label for="organizationSelect1">Select Organization:</label>
+				<select id="organizationSelect1" name="organizationSelect1">
+					<option value="">Select Organization</option>
+					<option value="Academy of Innovation">Academy of Innovation</option>
+					<option value="Crafter's Guild">Crafter's Guild</option>
+					<option value="Crowd">Crowd</option>
+					<option value="Daihonsha">Daihonsha</option>
+					<option value="Daylight Alliance">Daylight Alliance</option>
+					<option value="Diamond Assembly">Diamond Assembly</option>
+					<option value="Guild of Wind and Flame">Guild of Wind and Flame</option>
+					<option value="Hidden Court">Hidden Court*</option>
+					<option value="Jin Shi">Jin Shi*</option>
+					<option value="Merchant's Guild">Merchant's Guild</option>
+					<option value="Royal Academy">Royal Academy</option>
+					<option value="Sentries">Sentries*</option>
+					<option value="Sultan's Court">Sultan's Court</option>
+					<option value="Temple">Temple</option>
+					<option value="Thieve's Guild">Thieve's Guild</option>
+					<!-- More organizations -->
+				</select>
+
+				<label for="rankInput1">Rank:</label>
+				<input type="number" id="rankInput1" name="rankInput1" min="1" max="3">
+
+				<!-- Button to add new pairs -->
+				<button type="button" onclick="addOrganization()">Add Organization</button>
+			</div>
+
+			<script>
+				let organizationCount = 1;
+
+				function addOrganization() {
+					organizationCount++;
+					const newOrganizationHTML = `
+						<div id="organizationPair${organizationCount}">
+							<label for="organizationSelect${organizationCount}">Select Organization:</label>
+							<select id="organizationSelect${organizationCount}" name="organizationSelect${organizationCount}">
+								<option value="">Select Organization</option>
+								<option value="Academy of Innovation">Academy of Innovation</option>
+								<option value="Crafter's Guild">Crafter's Guild</option>
+								<option value="Crowd">Crowd</option>
+								<option value="Daihonsha">Daihonsha</option>
+								<option value="Daylight Alliance">Daylight Alliance</option>
+								<option value="Diamond Assembly">Diamond Assembly</option>
+								<option value="Guild of Wind and Flame">Guild of Wind and Flame</option>
+								<option value="Hidden Court">Hidden Court*</option>
+								<option value="Jin Shi">Jin Shi*</option>
+								<option value="Merchant's Guild">Merchant's Guild</option>
+								<option value="Royal Academy">Royal Academy</option>
+								<option value="Sentries">Sentries*</option>
+								<option value="Sultan's Court">Sultan's Court</option>
+								<option value="Temple">Temple</option>
+								<option value="Thieve's Guild">Thieve's Guild</option>
+								<!-- More organizations -->
+							</select>
+
+							<label for="rankInput${organizationCount}">Rank:</label>
+							<input type="number" id="rankInput${organizationCount}" name="rankInput${organizationCount}" min="1" max="3">
+
+							<button type="button" onclick="removeOrganization(${organizationCount})">Remove</button>
+						</div>
+					`;
+					const organizationSection = document.getElementById('organizationSection');
+					organizationSection.insertAdjacentHTML('beforeend', newOrganizationHTML);
+				}
+
+				function removeOrganization(id) {
+					const orgPair = document.getElementById(`organizationPair${id}`);
+					if (orgPair) {
+						orgPair.remove();
+					}
+				}
+			</script>
+			
+			<div id="craftSection">
+				<label for="craftSelect1">Select Crafts:</label>
+				<select id="craftSelect1" name="craftSelect1">
+					<option value="">Select Craft</option>
+					<option value="Alchemy">Alchemy</option>
+					<option value="Artificing">Artificing</option>
+					<option value="Caligraphy">Caligraphy</option>
+					<option value="Clothier">Clothier</option>
+					<option value="Cooking">Cooking</option>
+					<option value="Courtesan">Courtesan</option>
+					<option value="Droving">Droving</option>
+					<option value="Jewelrysmithing">Jewlrysmithing</option>
+					<option value="Runecrafting">Runecrafting</option>
+					<option value="Smithing">Smithing</option>
+					<option value="Tattooing">Tattooing</option>
+					<option value="Wandmaking">Wandmaking</option>
+					<!-- More organizations -->
+				</select>
+
+				<label for="craftInput1">Craft Level:</label>
+				<input type="number" id="craftInput1" name="craftInput1" min="1" max="4">
+
+				<!-- Button to add new pairs -->
+				<button type="button" onclick="addCraft()">Add Craft</button>
+			</div>
+
+			<script>
+				let craftCount = 1;
+
+				function addCraft() {
+					craftCount++;
+					const newCraftHTML = `
+						<div id="craftPair${craftCount}">
+							<label for="craftSelect${craftCount}">Select Craft:</label>
+							<select id="craftSelect${craftCount}" name="craftSelect${craftCount}">
+								<option value="">Select Craft</option>
+								<option value="Alchemy">Alchemy</option>
+								<option value="Artificing">Artificing</option>
+								<option value="Caligraphy">Caligraphy</option>
+								<option value="Clothier">Clothier</option>
+								<option value="Cooking">Cooking</option>
+								<option value="Courtesan">Courtesan</option>
+								<option value="Droving">Droving</option>
+								<option value="Jewelrysmithing">Jewlrysmithing</option>
+								<option value="Runecrafting">Runecrafting</option>
+								<option value="Smithing">Smithing</option>
+								<option value="Tattooing">Tattooing</option>
+								<option value="Wandmaking">Wandmaking</option>
+							</select>
+
+							<label for="rankInput${craftCount}">Rank:</label>
+							<input type="number" id="rankInput${craftCount}" name="rankInput${craftCount}" min="1" max="4">
+
+							<button type="button" onclick="removeCraft(${craftCount})">Remove</button>
+						</div>
+					`;
+					const craftSection = document.getElementById('craftSection');
+					craftSection.insertAdjacentHTML('beforeend', newCraftHTML);
+				}
+
+				function removeCraft(id) {
+					const craftPair = document.getElementById(`craftPair${id}`);
+					if (craftPair) {
+						craftPair.remove();
+					}
+				}
+			</script>
+			
+			<label for="knowledges">Knowledges (3 per rank of knowledge, or 1 if taking rank 1):</label>
+            <input type="text" id="knowledges" name="knowledges" required>
+			
+			<label for="languages">Known Languages (3 per rank of Languages, plus any lineage, background, or organization bonuses):</label>
+            <input type="text" id="languages" name="languages" required>
+			
+			<label for="rare languages">Known Rare Languages (2 per rank of Rare Languages, plus any lineage, background, or organization bonuses):</label>
+            <input type="text" id="rare languages" name="rare languages" required>
+			
+			<label for="rumors">Rumor Locations. 1 per Rumors rank, plus any bonuses from backgrounds and what not:</label>
+            <input type="text" id="rumors" name="rumors" required>
+			
+			<label for="boughtRitualCount">Bought Rituals:</label>
+			<select id="boughtRitualCount"></select>
+			
+			<lable for="ritualSelect">Ritual Selections</lable>
+			<select id="ritualSelect1" name="ritualSelect1">
+				<option value="">Select Ritual 1</option>
+			</select>
+
+			<select id="ritualSelect2" name="ritualSelect2">
+				<option value="">Select Ritual 2</option>
+			</select>
+			
+			<div id="boughtRitualContainer"></div>
+			
+			<button type="button" onclick="submitCharacterForm()">Submit</button>
+			
+			<div id="skillTreesList">
+				<ul id="skillTrees"></ul>
+			</div>
+			<div id="skillDetail"></div>
+        </form>
+    </div>
+	<script src="skills.js"></script>
+    <script src="script2.js"></script>
+</body>
+</html>
