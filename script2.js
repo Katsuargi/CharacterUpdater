@@ -613,6 +613,12 @@ function getSkillsFromTrees(skillTreeNames) {
 
 function updateLineageOptions() {
     var lineage = document.getElementById('characterLineage').value;
+	// Show or hide the lineage skill box depending on whether the selected lineage has valid options
+	const lineageSkillBox = document.getElementById('lineageSkillSelectContainer');
+	const lineageOptions = skillsData[lineage];
+	const lineageHasOptions = lineageOptions && Object.values(lineageOptions)[0]?.[0]?.options?.length > 0;
+	lineageSkillBox.style.display = lineageHasOptions ? 'inline-block' : 'none';
+	
     var secondLineageElement = document.getElementById('secondLineageSelect');
     var secondLineageValue = secondLineageElement.value;
     var elementSelection = document.getElementById('elementSelection');
