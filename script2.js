@@ -625,7 +625,8 @@ function getSkillsFromTrees(skillTreeNames) {
     return skills;
 }
 
-function updateLineageOptions() {
+function updateLineageOptions(charData = null) {
+	console.log("📌 updateLineageOptions fired");
     var lineage = document.getElementById('characterLineage').value;
 	// Show or hide the lineage skill box depending on whether the selected lineage has valid options
 	const lineageSkillBox = document.getElementById('lineageSkillSelectContainer');
@@ -675,12 +676,29 @@ function updateLineageOptions() {
     }
 
     // Display thin blood options and populate dropdown if Thin Blood is checked
-    if (thinBloodCheckbox) {
-        document.getElementById('thinBloodSelection').style.display = 'block';
-        populateThinBloodDropdown(lineage);
-    } else {
-        resetDropdown('thinBloodSkillSelect');
-    }
+	if (thinBloodCheckbox) {
+		document.getElementById('thinBloodSelection').style.display = 'block';
+		populateThinBloodDropdown(lineage);
+
+		// 🧪 Apply the value *after* options exist
+		setTimeout(() => {
+			const thinDropdown = document.getElementById('thinBloodSkillSelect');
+			const thinValue = charData?.thinBloodSkillSelect;
+
+			console.log("🧪 DEBUG thinDropdown:", thinDropdown);
+			console.log("🧪 DEBUG thinValue:", thinValue);
+			console.log("🧪 DEBUG thinDropdown.options:", thinDropdown?.options);
+
+			if (thinDropdown && thinValue) {
+				thinDropdown.value = thinValue;
+				console.log("✅ Assigned thin blood dropdown after options populated:", thinValue);
+			} else {
+				console.warn("⚠️ Thin blood dropdown assignment failed");
+			}
+		}, 1000);
+	} else {
+		resetDropdown('thinBloodSkillSelect');
+	}
 	// Call populateLineageOptions for the primary lineage dropdown
     populateLineageOptions(lineage, 'lineageSkillSelect');
 
@@ -791,15 +809,33 @@ function populateHalfBloodDropdowns(lineage, secondLineageValue) {
     });
 }
 
-function populateThinBloodDropdown(lineage) {
-    if (lineage !== 'None' && lineage) {
-        const skills = skillsData[lineage] || {};
-        if (Object.keys(skills).length > 1) { // Check if there are more than one skill
-            clearAndPopulateDropdown('thinBloodSkillSelect', lineage, skills);
-        } else {
-            // Optionally handle the UI aspect here if there's only one skill
-            resetDropdown('thinBloodSkillSelect'); // Clear the dropdown if only one skill is available
-        }
+function populateThinBloodDropdown(lineage, charData = null) {
+    console.log("💥 populateThinBloodDropdown was called");
+
+    const dropdown = document.getElementById('thinBloodSkillSelect');
+    if (!dropdown) return;
+
+    const lineageSkills = skillsData[lineage] || {};
+    console.log(`Populating thinBloodSkillSelect with skills from ${lineage}:`, lineageSkills);
+
+    dropdown.innerHTML = ''; // Clear
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select Skill';
+    dropdown.appendChild(defaultOption);
+
+    Object.entries(lineageSkills).forEach(([name]) => {
+        const option = document.createElement('option');
+        option.value = `${lineage}:${name}`;
+        option.textContent = name;
+        dropdown.appendChild(option);
+    });
+
+    // ✅ Set the value from charData if passed in
+    if (charData?.thinBloodSkillSelect) {
+        dropdown.value = charData.thinBloodSkillSelect;
+        console.log("✅ Set thinBloodSkillSelect to saved value:", charData.thinBloodSkillSelect);
     }
 }
 
@@ -1131,9 +1167,23 @@ function applyCharacterData(charData) {
             element.value = value;
         }
 
-        if (key === 'characterLineage' || key === 'secondLineageSelect' || key === 'halfBloodCheckbox' || key === 'thinBloodCheckbox') {
-            updateLineageOptions();
-        }
+		if (
+			key === 'characterLineage' ||
+			key === 'secondLineageSelect' ||
+			key === 'halfBloodCheckbox' ||
+			key === 'thinBloodCheckbox'
+		) {
+			const before = document.getElementById('thinBloodSkillSelect')?.value;
+			console.log("🟡 BEFORE updateLineageOptions - thinBloodSkillSelect:", before);
+
+			// Add a manual breakpoint if testing in browser dev tools:
+			// debugger;
+
+			updateLineageOptions(charData);
+
+			const after = document.getElementById('thinBloodSkillSelect')?.value;
+			console.log("🔴 AFTER updateLineageOptions - thinBloodSkillSelect:", after);
+		}
 
         if (key === 'classSelect') {
             updateClassDetails();
@@ -1177,44 +1227,6 @@ function applyCharacterData(charData) {
         }, 50);
     }
 
-    // Ensure all org/craft boxes exist BEFORE applying values
-    Object.entries(charData).forEach(([key, value]) => {
-        // Ensure org dropdowns exist
-        if (key.startsWith('organizationSelect')) {
-            const index = parseInt(key.replace('organizationSelect', ''), 10);
-            while (organizationCount < index) {
-                addOrganization();
-            }
-        }
-        if (key.startsWith('orgRankInput')) {
-            const index = parseInt(key.replace('orgRankInput', ''), 10);
-            while (organizationCount < index) {
-                addOrganization();
-            }
-        }
-
-        // Ensure craft dropdowns exist
-        if (key.startsWith('craftSelect')) {
-            const index = parseInt(key.replace('craftSelect', ''), 10);
-            while (craftCount < index) {
-                addCraft();
-            }
-        }
-        if (key.startsWith('craftRankInput')) {
-            const index = parseInt(key.replace('craftRankInput', ''), 10);
-            while (craftCount < index) {
-                addCraft();
-            }
-        }
-    });
-
-    // Now apply values to org/craft boxes
-    Object.entries(charData).forEach(([key, value]) => {
-        const el = document.getElementById(key);
-        if (el) el.value = value;
-    });
-
-    // Handle skill dropdowns
     Object.entries(charData).forEach(([key, value]) => {
         if (key.startsWith('skillSelect')) {
             const el = document.getElementById(key);
@@ -1238,10 +1250,65 @@ function applyCharacterData(charData) {
             };
             setTimeout(trySet, 100);
         }
+
+        // Handle dynamic orgs/crafts
+        if (key.startsWith("organizationSelect")) {
+            const index = parseInt(key.replace("organizationSelect", ""));
+            while (organizationCount < index) {
+                addOrganization();
+            }
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
+
+        if (key.startsWith("craftSelect")) {
+            const index = parseInt(key.replace("craftSelect", ""));
+            while (craftCount < index) {
+                addCraft();
+            }
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
+
+        if (key.startsWith("orgRankInput")) {
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
+
+        if (key.startsWith("craftRankInput")) {
+            const el = document.getElementById(key);
+            if (el) el.value = value;
+        }
     });
 
-    populateCharacterSheet(charData);
-    console.log("✅ Character loaded:", charData);
+    // ✅ Final reapply to catch late-populated special dropdowns
+    setTimeout(() => {
+        console.log("🔁 Re-applying special lineage dropdown values");
+
+        const thin = document.getElementById('thinBloodSkillSelect');
+        const thinValue = charData['thinBloodSkillSelect'];
+        if (thin && thinValue) {
+            thin.value = thinValue;
+            console.log("✅ Re-applied thin blood:", thinValue);
+        }
+
+        const hb1 = document.getElementById('halfBloodSkillSelect1');
+        const hb2 = document.getElementById('halfBloodSkillSelect2');
+        const hbVal1 = charData['halfBloodSkillSelect1'];
+        const hbVal2 = charData['halfBloodSkillSelect2'];
+
+        if (hb1 && hbVal1) {
+            hb1.value = hbVal1;
+            console.log("✅ Re-applied half blood 1:", hbVal1);
+        }
+
+        if (hb2 && hbVal2) {
+            hb2.value = hbVal2;
+            console.log("✅ Re-applied half blood 2:", hbVal2);
+        }
+    }, 100);
+
+    console.log("🎉 Character loaded:", charData);
 }
 
 function generateCharacterDataForPrint() {
