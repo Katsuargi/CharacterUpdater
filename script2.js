@@ -835,6 +835,10 @@ function submitCharacterForm() {
     let data = '';
     const selectedElement = document.getElementById('element').value;
     const selectedClass = document.getElementById('classSelect').value;
+	if (classInfo) {
+    data += `path: ${classInfo.path}\n`;
+    data += `role: ${classInfo.role}\n`;
+}
     const lineage = document.getElementById('characterLineage').value;
     const secondLineageValue = document.getElementById('secondLineageSelect').value;
     const halfBloodCheckbox = document.getElementById('halfBloodCheckbox').checked;
@@ -1086,7 +1090,15 @@ function loadFromFile() {
     const reader = new FileReader();
     reader.onload = function(e) {
         const parsedData = parseCharacterText(e.target.result);
+
+        // Load character into the builder as usual
         applyCharacterData(parsedData);
+
+        // 🔁 Also store for character sheet printing
+        localStorage.setItem('loadedCharacter', JSON.stringify(parsedData));
+
+        // 🔓 Open printable sheet in a new tab
+        //window.open('characterSheet.html', '_blank');
     };
     reader.readAsText(file);
 }
@@ -1223,7 +1235,90 @@ function applyCharacterData(charData) {
             const el = document.getElementById(key);
             if (el) el.value = value;
         }
+		populateCharacterSheet(charData);
     });
 
     console.log("Character loaded:", charData);
+}
+
+function generateCharacterDataForPrint() {
+    const form = document.getElementById('characterForm');
+    const data = {};
+    const selectedElement = document.getElementById('element').value;
+    const selectedClass = document.getElementById('classSelect').value;
+    const lineage = document.getElementById('characterLineage').value;
+    const secondLineageValue = document.getElementById('secondLineageSelect').value;
+    const halfBloodCheckbox = document.getElementById('halfBloodCheckbox').checked;
+    const thinBloodCheckbox = document.getElementById('thinBloodCheckbox').checked;
+    const invalidValues = ['', 'undefined (Details not available)', 'N/A'];
+
+    data.bonusProgressionCount = document.getElementById('bonusProgressionCount')?.value || '0';
+    data.earnedProgressionCount = document.getElementById('earnedProgressionCount')?.value || '0';
+    data.boughtRitualCount = document.getElementById('boughtRitualCount')?.value || '0';
+
+    Array.from(form.elements).forEach(element => {
+        if (element.name && element.type !== 'submit') {
+            let value = element.type === 'checkbox' ? (element.checked ? 'Yes' : 'No') : element.value;
+            if (!invalidValues.includes(value)) {
+                let name = element.name;
+
+                if (name.startsWith('rankInput')) {
+                    if (element.id.startsWith('craftRankInput')) {
+                        name = element.id;
+                    } else if (element.id.startsWith('orgRankInput')) {
+                        name = element.id;
+                    }
+                }
+
+                data[name] = value;
+            }
+        }
+    });
+
+    document.querySelectorAll('.skillSelect, .skillSelect2').forEach(select => {
+        if (!['thinBloodSkillSelect', 'halfBloodSkillSelect1', 'halfBloodSkillSelect2'].includes(select.id)) {
+            if (select && !invalidValues.includes(select.value)) {
+                data[select.id] = select.value;
+            }
+        }
+    });
+
+    document.querySelectorAll('[id^="skillOptionSelect_"]').forEach(select => {
+        if (select && select.value && select.value !== 'N/A') {
+            data[select.id] = select.value;
+        }
+    });
+
+    for (let i = 0; i < parseInt(data.boughtRitualCount); i++) {
+        const ritual = document.getElementById(`boughtRitual${i}`)?.value;
+        if (ritual && ritual !== '') {
+            data[`boughtRitual${i}`] = ritual;
+        }
+    }
+
+    // We’ll still parse these sections via process*() but just attach them to data instead
+    if (!halfBloodCheckbox && !thinBloodCheckbox) {
+        if (!invalidValues.includes(lineage)) {
+            data.lineageSkills = processLineageSkills(lineage, '', selectedElement);
+        }
+        if (!invalidValues.includes(secondLineageValue) && secondLineageValue !== lineage) {
+            data.secondLineageSkills = processLineageSkills(secondLineageValue, '', selectedElement);
+        }
+    }
+
+    if (thinBloodCheckbox) {
+        data.thinBloodSkills = processSpecialSelections(['thinBloodSkillSelect'], '', selectedElement, 'Thin Blood');
+    }
+
+    if (halfBloodCheckbox) {
+        data.halfBloodSkills = processSpecialSelections(['halfBloodSkillSelect1', 'halfBloodSkillSelect2'], '', selectedElement, 'Half Blood');
+    }
+
+    return data;
+}
+
+function openPrintableCharacterSheet() {
+    const charData = generateCharacterDataForPrint();
+    const encoded = btoa(encodeURIComponent(JSON.stringify(charData)));
+    window.open(`characterSheet.html?data=${encoded}`, '_blank');
 }
