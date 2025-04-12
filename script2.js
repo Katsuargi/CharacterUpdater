@@ -1177,7 +1177,44 @@ function applyCharacterData(charData) {
         }, 50);
     }
 
-    // Handle skill options AFTER skill selects are populated
+    // Ensure all org/craft boxes exist BEFORE applying values
+    Object.entries(charData).forEach(([key, value]) => {
+        // Ensure org dropdowns exist
+        if (key.startsWith('organizationSelect')) {
+            const index = parseInt(key.replace('organizationSelect', ''), 10);
+            while (organizationCount < index) {
+                addOrganization();
+            }
+        }
+        if (key.startsWith('orgRankInput')) {
+            const index = parseInt(key.replace('orgRankInput', ''), 10);
+            while (organizationCount < index) {
+                addOrganization();
+            }
+        }
+
+        // Ensure craft dropdowns exist
+        if (key.startsWith('craftSelect')) {
+            const index = parseInt(key.replace('craftSelect', ''), 10);
+            while (craftCount < index) {
+                addCraft();
+            }
+        }
+        if (key.startsWith('craftRankInput')) {
+            const index = parseInt(key.replace('craftRankInput', ''), 10);
+            while (craftCount < index) {
+                addCraft();
+            }
+        }
+    });
+
+    // Now apply values to org/craft boxes
+    Object.entries(charData).forEach(([key, value]) => {
+        const el = document.getElementById(key);
+        if (el) el.value = value;
+    });
+
+    // Handle skill dropdowns
     Object.entries(charData).forEach(([key, value]) => {
         if (key.startsWith('skillSelect')) {
             const el = document.getElementById(key);
@@ -1203,43 +1240,8 @@ function applyCharacterData(charData) {
         }
     });
 
-    // Handle org/craft select dropdowns and associated ranks
-    Object.entries(charData).forEach(([key, value]) => {
-        // Organization dropdowns
-        if (key.startsWith("organizationSelect")) {
-            const index = parseInt(key.replace("organizationSelect", ""));
-            while (organizationCount < index) {
-                addOrganization();
-            }
-            const el = document.getElementById(key);
-            if (el) el.value = value;
-        }
-
-        // Craft dropdowns
-        if (key.startsWith("craftSelect")) {
-            const index = parseInt(key.replace("craftSelect", ""));
-            while (craftCount < index) {
-                addCraft();
-            }
-            const el = document.getElementById(key);
-            if (el) el.value = value;
-        }
-
-        // Organization ranks
-        if (key.startsWith("orgRankInput")) {
-            const el = document.getElementById(key);
-            if (el) el.value = value;
-        }
-
-        // Craft ranks
-        if (key.startsWith("craftRankInput")) {
-            const el = document.getElementById(key);
-            if (el) el.value = value;
-        }
-		populateCharacterSheet(charData);
-    });
-
-    console.log("Character loaded:", charData);
+    populateCharacterSheet(charData);
+    console.log("✅ Character loaded:", charData);
 }
 
 function generateCharacterDataForPrint() {
