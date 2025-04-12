@@ -626,23 +626,22 @@ function getSkillsFromTrees(skillTreeNames) {
 }
 
 function updateLineageOptions(charData = null) {
-	console.log("📌 updateLineageOptions fired");
-    var lineage = document.getElementById('characterLineage').value;
-	// Show or hide the lineage skill box depending on whether the selected lineage has valid options
-	const lineageSkillBox = document.getElementById('lineageSkillSelectContainer');
-	const lineageOptions = skillsData[lineage];
-	const lineageHasOptions = lineageOptions && Object.values(lineageOptions)[0]?.[0]?.options?.length > 0;
-	lineageSkillBox.style.display = lineageHasOptions ? 'inline-block' : 'none';
-	
-    var secondLineageElement = document.getElementById('secondLineageSelect');
-    var secondLineageValue = secondLineageElement.value;
-    var elementSelection = document.getElementById('elementSelection');
-    var courtSelection = document.getElementById('courtSelection');
-    var halfBloodCheckbox = document.getElementById('halfBloodCheckbox').checked;
-    var thinBloodCheckbox = document.getElementById('thinBloodCheckbox').checked;
-    var secondLineageContainer = document.getElementById('secondLineage');
+    console.log("📌 updateLineageOptions fired");
 
-    // Hide all conditional sections initially and reset dropdowns
+    const lineage = document.getElementById('characterLineage').value;
+
+    const lineageSkillBox = document.getElementById('lineageSkillSelectContainer');
+    const lineageOptions = skillsData[lineage];
+    const lineageHasOptions = lineageOptions && Object.values(lineageOptions)[0]?.[0]?.options?.length > 0;
+    lineageSkillBox.style.display = lineageHasOptions ? 'inline-block' : 'none';
+
+    const secondLineageValue = document.getElementById('secondLineageSelect').value;
+    const elementSelection = document.getElementById('elementSelection');
+    const courtSelection = document.getElementById('courtSelection');
+    const halfBloodCheckbox = document.getElementById('halfBloodCheckbox').checked;
+    const thinBloodCheckbox = document.getElementById('thinBloodCheckbox').checked;
+    const secondLineageContainer = document.getElementById('secondLineage');
+
     elementSelection.style.display = 'none';
     courtSelection.style.display = 'none';
     secondLineageContainer.style.display = 'none';
@@ -653,59 +652,64 @@ function updateLineageOptions(charData = null) {
     resetDropdown('halfBloodSkillSelect2');
     resetDropdown('thinBloodSkillSelect');
 
-    // Display element selection if Aetherite or Dragonkin is selected in either dropdown
+    // Element and Court toggles
     if (lineage === 'Aetherite' || lineage === 'Dragonkin' ||
         secondLineageValue === 'Aetherite' || secondLineageValue === 'Dragonkin') {
         elementSelection.style.display = 'block';
     }
 
-    // Display court selection if Feytouched is selected in either dropdown
     if (lineage === 'Feytouched' || secondLineageValue === 'Feytouched') {
         courtSelection.style.display = 'block';
     }
 
-    // Display second lineage options and populate dropdowns if Half Blood is checked
+    // Half Blood Logic
     if (halfBloodCheckbox) {
         secondLineageContainer.style.display = 'block';
         document.getElementById('halfBloodSelection1').style.display = 'block';
         document.getElementById('halfBloodSelection2').style.display = 'block';
+
         populateHalfBloodDropdowns(lineage, secondLineageValue);
-    } else {
-        resetDropdown('halfBloodSkillSelect1');
-        resetDropdown('halfBloodSkillSelect2');
+
+        setTimeout(() => {
+            const hb1 = document.getElementById('halfBloodSkillSelect1');
+            const hb2 = document.getElementById('halfBloodSkillSelect2');
+            const hbVal1 = charData?.halfBloodSkillSelect1;
+            const hbVal2 = charData?.halfBloodSkillSelect2;
+
+            if (hb1 && hbVal1) {
+                hb1.value = hbVal1;
+                console.log("✅ Assigned half blood skill 1:", hbVal1);
+            }
+            if (hb2 && hbVal2) {
+                hb2.value = hbVal2;
+                console.log("✅ Assigned half blood skill 2:", hbVal2);
+            }
+        }, 50);
     }
 
-    // Display thin blood options and populate dropdown if Thin Blood is checked
-	if (thinBloodCheckbox) {
-		document.getElementById('thinBloodSelection').style.display = 'block';
-		populateThinBloodDropdown(lineage);
+    // Thin Blood Logic
+    if (thinBloodCheckbox) {
+        document.getElementById('thinBloodSelection').style.display = 'block';
 
-		// 🧪 Apply the value *after* options exist
-		setTimeout(() => {
-			const thinDropdown = document.getElementById('thinBloodSkillSelect');
-			const thinValue = charData?.thinBloodSkillSelect;
+        populateThinBloodDropdown(lineage);
 
-			console.log("🧪 DEBUG thinDropdown:", thinDropdown);
-			console.log("🧪 DEBUG thinValue:", thinValue);
-			console.log("🧪 DEBUG thinDropdown.options:", thinDropdown?.options);
+        setTimeout(() => {
+            const thinDropdown = document.getElementById('thinBloodSkillSelect');
+            const thinValue = charData?.thinBloodSkillSelect;
+            if (thinDropdown && thinValue) {
+                thinDropdown.value = thinValue;
+                console.log("✅ Assigned thin blood dropdown after options populated:", thinValue);
+            } else {
+                console.warn("⚠️ Thin blood dropdown assignment failed");
+            }
+        }, 50);
+    }
 
-			if (thinDropdown && thinValue) {
-				thinDropdown.value = thinValue;
-				console.log("✅ Assigned thin blood dropdown after options populated:", thinValue);
-			} else {
-				console.warn("⚠️ Thin blood dropdown assignment failed");
-			}
-		}, 1000);
-	} else {
-		resetDropdown('thinBloodSkillSelect');
-	}
-	// Call populateLineageOptions for the primary lineage dropdown
     populateLineageOptions(lineage, 'lineageSkillSelect');
 
-    // Optionally, handle additional options for the secondary lineage
     if (halfBloodCheckbox) {
         populateLineageOptions(secondLineageValue, 'secondLineageSkillSelect');
-	}
+    }
 }
 
 function resetDropdown(dropdownId) {

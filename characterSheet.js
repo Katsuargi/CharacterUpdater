@@ -16,83 +16,114 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function populatePrintableSheet(charData) {
-    const get = id => document.getElementById(id);
-    const selectedElement = charData.element || '';
-    const parsedSkills = parseSkillsFromCharacterData(charData, selectedElement);
-    console.log("🟡 Parsed skills array:", parsedSkills);
+	const get = id => document.getElementById(id);
+	const selectedElement = charData.element || '';
+	
+	// First, parse normal/universal skills as originally done:
+	const parsedSkills = parseSkillsFromCharacterData(charData, selectedElement);
+	console.log("🟡 Parsed skills array:", parsedSkills);
 
-    // Character info section
-    get('printCharacterName').textContent = charData.characterName || '';
-    get('printPlayerName').textContent = charData.playerName || '';
-    get('printEmail').textContent = charData.playerEmail || '';
-    get('printStanding').textContent = charData.characterStanding || '';
-    get('printClass').textContent = charData.classSelect || '';
-    get('printLineage').textContent = charData.characterLineage || '';
-    get('printSecondLineage').textContent = charData.secondLineageSelect ? `, ${charData.secondLineageSelect}` : '';
-    get('printElement').textContent = charData.element || '';
-    get('printDiety').textContent = charData.diety || '';
-    get('printPronouns').textContent = charData.playerPronouns || '';
-    get('printBackground').textContent = `${charData.characterBackground || ''}${charData.characterBackground2 ? ', ' + charData.characterBackground2 : ''}`;
-    get('printPath').textContent = charData.path || '';
-    get('printRole').textContent = charData.role || '';
+	// Populate top character details
+	get('printCharacterName').textContent = charData.characterName || '';
+	get('printPlayerName').textContent = charData.playerName || '';
+	get('printEmail').textContent = charData.playerEmail || '';
+	get('printStanding').textContent = charData.characterStanding || '';
+	get('printClass').textContent = charData.classSelect || '';
+	get('printLineage').textContent = charData.characterLineage || '';
+	get('printSecondLineage').textContent = charData.secondLineageSelect ? `, ${charData.secondLineageSelect}` : '';
+	get('printElement').textContent = charData.element || '';
+	get('printDiety').textContent = charData.diety || '';
+	get('printPronouns').textContent = charData.playerPronouns || '';
+	get('printBackground').textContent = `${charData.characterBackground || ''}${charData.characterBackground2 ? ', ' + charData.characterBackground2 : ''}`;
+	get('printPath').textContent = charData.path || '';
+	get('printRole').textContent = charData.role || '';
 
-    // Table mapping
-    const tableMap = {
-        0: 'skillTree1',
-        1: 'skillTree2',
-        2: 'skillTree3',
-        Universal: 'universalSkills',
-        Lineage: 'lineageSkills',
-        Unique: 'uniquePowerTableBody',
-    };
+	const tableMap = {
+		0: 'skillTree1',
+		1: 'skillTree2',
+		2: 'skillTree3',
+		Universal: 'universalSkills',
+		Lineage: 'lineageSkills',
+		Unique: 'uniquePowerTableBody',
+	};
 
-    let treeIndex = 0;
-    const assignedTables = {};
+	let treeIndex = 0;
+	const assignedTables = {};
 
-    parsedSkills.forEach(skillGroup => {
-        const tree = skillGroup.tree;
+	// Populate normal and universal skills first (original working logic):
+	parsedSkills.forEach(skillGroup => {
+		const tree = skillGroup.tree;
+		let tableId;
 
-        let tableId;
-        if (tree === 'Universal') {
-            tableId = tableMap.Universal;
-        } else if (tree === 'Unique') {
-            tableId = tableMap.Unique;
-            document.getElementById('uniquePowerSection').classList.remove('hidden');
-        } else {
-            if (!assignedTables[tree]) {
-                tableId = tableMap[treeIndex++];
-                assignedTables[tree] = tableId;
+		if (tree === 'Universal') {
+			tableId = tableMap.Universal;
+		} else if (tree === 'Unique') {
+			tableId = tableMap.Unique;
+			document.getElementById('uniquePowerSection').classList.remove('hidden');
+		} else {
+			if (!assignedTables[tree]) {
+				tableId = tableMap[treeIndex++];
+				assignedTables[tree] = tableId;
 
-                // Rename the header to the skill tree name
-                const header = document.querySelector(`#${tableId}`).previousElementSibling;
-                if (header && header.tagName === 'H2') {
-                    header.textContent = tree;
-                }
-            }
-            tableId = assignedTables[tree];
-        }
+				const header = document.querySelector(`#${tableId}`).previousElementSibling;
+				if (header && header.tagName === 'H2') {
+					header.textContent = tree;
+				}
+			}
+			tableId = assignedTables[tree];
+		}
 
-        const tbody = document.querySelector(`#${tableId} tbody`);
-        if (!tbody) {
-            console.warn(`❌ Could not find tbody for tableId: ${tableId}`);
-            return;
-        }
+		const tbody = document.querySelector(`#${tableId} tbody`);
+		if (!tbody) return;
 
-        skillGroup.skills.forEach((skill, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index === 0 || skill.name !== skillGroup.skills[index - 1]?.name ? `<strong>${skill.name}</strong>` : ''}</td>
-                <td>${skill.type || ''}</td>
-                <td>${skill.effect || ''}</td>
-                <td>${skill.time || ''}</td>
-                <td>${skill.delivery || ''}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    });
+		skillGroup.skills.forEach((skill, index) => {
+			const row = document.createElement('tr');
+			row.innerHTML = `
+				<td>${index === 0 || skill.name !== skillGroup.skills[index - 1]?.name ? `<strong>${skill.name}</strong>` : ''}</td>
+				<td>${skill.type || ''}</td>
+				<td>${skill.effect || ''}</td>
+				<td>${skill.time || ''}</td>
+				<td>${skill.delivery || ''}</td>
+			`;
+			tbody.appendChild(row);
+		});
+	});
 
-    console.log("✅ Finished populating skills.");
-    console.log("✅ Populated printable sheet with character data:", charData);
+	// Now, safely add lineage skills separately (second logic adjusted):
+	const lineageSources = ['lineageSkills', 'secondLineageSkills', 'thinBloodSkills', 'halfBloodSkills'];
+	lineageSources.forEach(key => {
+		const rawText = charData[key];
+		if (!rawText) return;
+
+		const matches = rawText.match(/Skill - ([^(]+)(?: \(([^)]+)\))?:/g);
+		if (!matches) return;
+
+		matches.forEach(match => {
+			const skillName = match.match(/Skill - ([^(]+)(?: \(([^)]+)\))?/)[1]?.trim();
+			const tree = Object.keys(skillsData).find(tree =>
+				skillsData[tree][skillName]
+			);
+
+			if (tree) {
+				const skill = skillsData[tree][skillName];
+				const entries = Array.isArray(skill) ? skill : [skill];
+
+				entries.forEach((entry, i) => {
+					const row = document.createElement('tr');
+					row.innerHTML = `
+						<td>${i === 0 ? `<strong>${skillName}</strong>` : ''}</td>
+						<td>${entry.useType || ''}</td>
+						<td>${entry.effect || ''}</td>
+						<td>${entry.time || ''}</td>
+						<td>${entry.deliveryType || ''}</td>
+					`;
+					document.querySelector(`#${tableMap.Lineage} tbody`).appendChild(row);
+				});
+			}
+		});
+	});
+
+	console.log("✅ Finished populating skills and lineage.");
 }
 
 function parseSkillsFromCharacterData(charData, selectedElement) {
