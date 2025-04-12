@@ -1597,7 +1597,8 @@ const skillsData = {
 		"Vicious Strikes": [
 			{
 				"useType": "D",
-				"effect": "Substitute Stun 15 seconds. Swing / Projectile"
+				"effect": "Substitute Stun 15 seconds.",
+				"deliveryType": "Swing/Projectile"
 			},
 			{
 				"useType": "D",
@@ -1613,7 +1614,8 @@ const skillsData = {
 		"Killing Blow (Final)": [
 			{
 				"useType": "E",
-				"effect": "Substitute 50 Bypass. Swing / Projectile"
+				"effect": "Substitute 50 Bypass.",
+				"deliveryType": "Swing / Projectile"
 			}
 		],
 		"Killing Blow (Final) Upgrade": [

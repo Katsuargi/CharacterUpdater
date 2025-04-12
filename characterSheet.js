@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function populatePrintableSheet(charData) {
 	const get = id => document.getElementById(id);
 	const selectedElement = charData.element || '';
-	
+
 	// First, parse normal/universal skills as originally done:
 	const parsedSkills = parseSkillsFromCharacterData(charData, selectedElement);
 	console.log("🟡 Parsed skills array:", parsedSkills);
@@ -44,18 +44,24 @@ function populatePrintableSheet(charData) {
 		2: 'skillTree3',
 		Universal: 'universalSkills',
 		Lineage: 'lineageSkills',
+		Craft: 'craftSkills',
 		Unique: 'uniquePowerTableBody',
 	};
 
 	let treeIndex = 0;
 	const assignedTables = {};
 
-	// Populate normal and universal skills first (original working logic):
+	// Populate normal, universal, craft, unique skills
 	parsedSkills.forEach(skillGroup => {
 		const tree = skillGroup.tree;
 		let tableId;
 
-		if (tree === 'Universal') {
+		// Re-route universal crafts to craft table
+		const isCraft = tree === 'Universal' && skillGroup.skills[0]?.name?.match(/^(Craft|Artisan)\(/);
+
+		if (isCraft) {
+			tableId = tableMap.Craft;
+		} else if (tree === 'Universal') {
 			tableId = tableMap.Universal;
 		} else if (tree === 'Unique') {
 			tableId = tableMap.Unique;
@@ -89,7 +95,7 @@ function populatePrintableSheet(charData) {
 		});
 	});
 
-	// Now, safely add lineage skills separately (second logic adjusted):
+	// Lineage skills: Normal, Thin, Half Blood
 	const lineageSources = ['lineageSkills', 'secondLineageSkills', 'thinBloodSkills', 'halfBloodSkills'];
 	lineageSources.forEach(key => {
 		const rawText = charData[key];
