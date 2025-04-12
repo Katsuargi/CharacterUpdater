@@ -835,6 +835,7 @@ function submitCharacterForm() {
     let data = '';
     const selectedElement = document.getElementById('element').value;
     const selectedClass = document.getElementById('classSelect').value;
+	const classInfo = classes[selectedClass] || {};
 	if (classInfo) {
     data += `path: ${classInfo.path}\n`;
     data += `role: ${classInfo.role}\n`;
@@ -1252,6 +1253,13 @@ function generateCharacterDataForPrint() {
     const thinBloodCheckbox = document.getElementById('thinBloodCheckbox').checked;
     const invalidValues = ['', 'undefined (Details not available)', 'N/A'];
 
+    // Fetch path and role from class info and inject into character data
+    const classInfo = classes[selectedClass];
+    if (classInfo) {
+        data.path = classInfo.path;
+        data.role = classInfo.role;
+    }
+
     data.bonusProgressionCount = document.getElementById('bonusProgressionCount')?.value || '0';
     data.earnedProgressionCount = document.getElementById('earnedProgressionCount')?.value || '0';
     data.boughtRitualCount = document.getElementById('boughtRitualCount')?.value || '0';
@@ -1269,7 +1277,7 @@ function generateCharacterDataForPrint() {
                         name = element.id;
                     }
                 }
-
+				console.log("Generated character data for print:", data);
                 data[name] = value;
             }
         }
@@ -1296,7 +1304,6 @@ function generateCharacterDataForPrint() {
         }
     }
 
-    // We’ll still parse these sections via process*() but just attach them to data instead
     if (!halfBloodCheckbox && !thinBloodCheckbox) {
         if (!invalidValues.includes(lineage)) {
             data.lineageSkills = processLineageSkills(lineage, '', selectedElement);
@@ -1319,6 +1326,10 @@ function generateCharacterDataForPrint() {
 
 function openPrintableCharacterSheet() {
     const charData = generateCharacterDataForPrint();
+
+    // 🔍 Confirm what's inside BEFORE encoding
+    console.log("Data being sent to print:", charData);
+
     const encoded = btoa(encodeURIComponent(JSON.stringify(charData)));
     window.open(`characterSheet.html?data=${encoded}`, '_blank');
 }
