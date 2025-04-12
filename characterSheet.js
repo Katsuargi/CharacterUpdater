@@ -19,13 +19,9 @@ function populatePrintableSheet(charData) {
     const get = id => document.getElementById(id);
     const selectedElement = charData.element || '';
     const parsedSkills = parseSkillsFromCharacterData(charData, selectedElement);
+    console.log("🟡 Parsed skills array:", parsedSkills);
 
-    if (!charData) {
-        console.warn("No data passed to populatePrintableSheet");
-        return;
-    }
-
-    // Basic field population
+    // Character info section
     get('printCharacterName').textContent = charData.characterName || '';
     get('printPlayerName').textContent = charData.playerName || '';
     get('printEmail').textContent = charData.playerEmail || '';
@@ -37,10 +33,11 @@ function populatePrintableSheet(charData) {
     get('printDiety').textContent = charData.diety || '';
     get('printPronouns').textContent = charData.playerPronouns || '';
     get('printBackground').textContent = `${charData.characterBackground || ''}${charData.characterBackground2 ? ', ' + charData.characterBackground2 : ''}`;
-	get('printPath').textContent = charData.path || '';
-	get('printRole').textContent = charData.role || '';
-    // Set up table references
-    const treeTables = {
+    get('printPath').textContent = charData.path || '';
+    get('printRole').textContent = charData.role || '';
+
+    // Table mapping
+    const tableMap = {
         0: 'skillTree1',
         1: 'skillTree2',
         2: 'skillTree3',
@@ -49,111 +46,91 @@ function populatePrintableSheet(charData) {
         Unique: 'uniquePowerTableBody',
     };
 
-    let usedTables = 0;
-    const treeCounts = {};
+    let treeIndex = 0;
+    const assignedTables = {};
 
-    // Loop through character data to extract skill text blocks
-    for (const [key, value] of Object.entries(charData)) {
-        if (!key.startsWith('Skill -')) continue;
+    parsedSkills.forEach(skillGroup => {
+        const tree = skillGroup.tree;
 
-        const matches = key.match(/Skill - ([^(]+)(?: \(([^)]+)\))?/);
-        if (!matches) continue;
-
-        const name = matches[1].trim();
-        const source = matches[2] || '';
-
-        let found = false;
-
-        for (const [tree, skills] of Object.entries(skillsData)) {
-            // Exact or fuzzy skill name match
-			let matchingKey = Object.keys(skills).find(keyName => {
-				const normalizedKey = keyName.replace(/\s*\(.*?\)\s*/g, '').trim().toLowerCase();
-				const normalizedName = name.replace(/\s*\(.*?\)\s*/g, '').trim().toLowerCase();
-				return normalizedKey === normalizedName;
-			});
-            if (matchingKey) {
-                const entries = Array.isArray(skills[matchingKey]) ? skills[matchingKey] : [skills[matchingKey]];
-
-                entries.forEach((entry, idx) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${idx === 0 ? `<strong>${matchingKey}</strong>` : ''}</td>
-                        <td>${entry.useType || ''}</td>
-                        <td>${entry.effect || ''}</td>
-                        <td>${entry.time || ''}</td>
-                        <td>${entry.deliveryType || ''}</td>
-                    `;
-
-                    let tableId;
-                    if (tree === 'Universal') {
-                        tableId = 'universalSkills';
-                    } else if (!treeCounts[tree]) {
-                        tableId = treeTables[usedTables++];
-                        treeCounts[tree] = tableId;
-
-                        const header = document.querySelector(`#${tableId}`).previousElementSibling;
-                        if (header && header.tagName === 'H2') {
-                            header.textContent = tree;
-                        }
-                    } else {
-                        tableId = treeCounts[tree];
-                    }
-
-                    const tbody = document.querySelector(`#${tableId} tbody`);
-                    if (tbody) {
-                        tbody.appendChild(row);
-                    }
-                });
-
-                found = true;
-                break;
-            }
-        }
-
-        if (!found && source === 'Lineage') {
-            const row = createSkillRow({ name, useType: '—', effect: value });
-            document.querySelector('#lineageSkills tbody').appendChild(row);
-        }
-
-        if (!found && source === 'Unique') {
-            const row = createSkillRow({ name, useType: '—', effect: value });
-            document.querySelector('#uniquePowerTableBody').appendChild(row);
+        let tableId;
+        if (tree === 'Universal') {
+            tableId = tableMap.Universal;
+        } else if (tree === 'Unique') {
+            tableId = tableMap.Unique;
             document.getElementById('uniquePowerSection').classList.remove('hidden');
-        }
-    }
+        } else {
+            if (!assignedTables[tree]) {
+                tableId = tableMap[treeIndex++];
+                assignedTables[tree] = tableId;
 
-    console.log("Populated printable sheet with character data:", charData);
+                // Rename the header to the skill tree name
+                const header = document.querySelector(`#${tableId}`).previousElementSibling;
+                if (header && header.tagName === 'H2') {
+                    header.textContent = tree;
+                }
+            }
+            tableId = assignedTables[tree];
+        }
+
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        if (!tbody) {
+            console.warn(`❌ Could not find tbody for tableId: ${tableId}`);
+            return;
+        }
+
+        skillGroup.skills.forEach((skill, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index === 0 || skill.name !== skillGroup.skills[index - 1]?.name ? `<strong>${skill.name}</strong>` : ''}</td>
+                <td>${skill.type || ''}</td>
+                <td>${skill.effect || ''}</td>
+                <td>${skill.time || ''}</td>
+                <td>${skill.delivery || ''}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    });
+
+    console.log("✅ Finished populating skills.");
+    console.log("✅ Populated printable sheet with character data:", charData);
 }
 
 function parseSkillsFromCharacterData(charData, selectedElement) {
-    console.log("Parsing skills from character data...");
+    console.log("🔍 Parsing skills from character data...");
     const skillEntries = [];
 
     for (const [key, value] of Object.entries(charData)) {
-        if (!key.startsWith('skillSelect')) continue;
+        // Match both standard and bonus skill selects
+        if (
+            !(key.startsWith('skillSelect') || key.startsWith('bonusSkillSelect') || key.startsWith('lineageSkillSelect'))
+        ) continue;
 
-        console.log("Found skill key:", key, "with value:", value);
+        console.log(`🧩 Found skill key: ${key} with value: ${value}`);
 
         const [skillTree, skillName] = value.split(/:(.+)/);
-        if (!skillTree || !skillName) {
-            console.warn("Malformed skill entry:", value);
-            continue;
-        }
+        if (!skillTree || !skillName) continue;
 
         const rawSkill = skillsData[skillTree]?.[skillName];
-        if (!rawSkill) {
-            console.warn("Skill not found in skillsData:", skillTree, skillName);
-            continue;
+        const entries = [];
+
+        if (Array.isArray(rawSkill)) {
+            rawSkill.forEach(detail =>
+                entries.push(formatSkillDetail(skillName, detail, selectedElement))
+            );
+        } else if (rawSkill) {
+            entries.push(formatSkillDetail(skillName, rawSkill, selectedElement));
+        } else {
+            console.warn(`⚠️ No skill data found for: ${skillTree}:${skillName}`);
         }
 
-        const entries = Array.isArray(rawSkill)
-            ? rawSkill.map(detail => formatSkillDetail(skillName, detail, selectedElement))
-            : [formatSkillDetail(skillName, rawSkill, selectedElement)];
-
-        skillEntries.push({ tree: skillTree, skills: entries });
+        skillEntries.push({
+            tree: skillTree,
+            name: skillName,
+            skills: entries
+        });
     }
 
-    console.log("Final parsed skills array:", skillEntries);
+    console.log("📦 Final parsed skills array:", skillEntries);
     return skillEntries;
 }
 
