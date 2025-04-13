@@ -101,6 +101,13 @@ function populatePrintableSheet(charData) {
 			tbody.appendChild(row);
 		});
 	});
+	
+	// Show skillTree4Wrapper if anything was added to it
+	if (document.querySelector('#skillTree4 tbody')?.children.length > 0) {
+		document.getElementById('skillTree4Wrapper').style.display = 'block';
+	} else {
+		document.getElementById('skillTree4Wrapper').style.display = 'none';
+	}
 
 	// Lineage skills: Normal, Thin, Half Blood
 	const lineageSources = ['lineageSkills', 'secondLineageSkills', 'thinBloodSkills', 'halfBloodSkills'];
