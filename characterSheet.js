@@ -42,6 +42,7 @@ function populatePrintableSheet(charData) {
 		0: 'skillTree1',
 		1: 'skillTree2',
 		2: 'skillTree3',
+		3: 'skillTree4',
 		Universal: 'universalSkills',
 		Lineage: 'lineageSkills',
 		Craft: 'craftSkills',
@@ -70,7 +71,9 @@ function populatePrintableSheet(charData) {
 		} else if (tree === 'Unique') {
 			tableId = tableMap.Unique;
 			document.getElementById('uniquePowerSection').classList.remove('hidden');
-		} else {
+		} 
+		
+			else {
 			if (!assignedTables[tree]) {
 				tableId = tableMap[treeIndex++];
 				assignedTables[tree] = tableId;
