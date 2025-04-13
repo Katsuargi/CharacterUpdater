@@ -3,81 +3,260 @@
 <head>
   <meta charset="UTF-8" />
   <title>Character Sheet</title>
-  <style>
-    body {
-      font-family: 'Times New Roman', serif;
-      margin: 20px;
-      padding: 0;
-    }
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    font-size: 12pt;
+    margin: 1in;
+    color: #000;
+  }
 
-    .character-info {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
-    }
+  h1, h2 {
+    text-align: center;
+    margin: 0.5em 0;
+  }
 
-    .character-info div {
-      border-bottom: 1px solid black;
-      padding: 4px 2px;
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+  }
 
-    .section {
-      margin-bottom: 30px;
-      page-break-inside: avoid;
-    }
+  th, td {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: left;
+  }
 
-    .section h2 {
-      border-bottom: 1px solid black;
-      margin-bottom: 8px;
-    }
+  th {
+    background-color: #ccc;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 12px;
-    }
+  .section {
+    margin-bottom: 2em;
+  }
 
-    th, td {
-      border: 1px solid black;
-      padding: 4px 6px;
-      text-align: left;
-    }
+  .section-header {
+    background-color: #888;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    padding: 6px;
+    font-size: 14pt;
+  }
 
-    .hidden {
-      display: none;
-    }
+  .highlight-notes {
+    background-color: #e5bcbc;
+    font-weight: bold;
+  }
 
-    @media print {
-      body {
-        margin: 0.5in;
-      }
+  .zebra-table tbody tr:nth-child(odd) {
+    background-color: #f8f8f8;
+  }
 
-      .hidden {
-        display: none !important;
-      }
+  .hidden {
+    display: none;
+  }
 
-      .section {
-        break-inside: avoid-page;
-      }
-    }
-  </style>
+  .lineage-box,
+  .rituals-box,
+  .notes-box {
+    border: 2px solid #000;
+    padding: 8px;
+    margin-top: 0.5em;
+  }
+
+  .lineage-box h3,
+  .rituals-box h3,
+  .notes-box h3 {
+    margin: 0 0 0.5em 0;
+    font-size: 13pt;
+    background-color: #ddd;
+    padding: 4px;
+  }
+
+  .logo-area {
+    text-align: center;
+    margin-bottom: 1em;
+  }
+
+  .logo-area img {
+    max-height: 80px;
+  }
+  
+  .character-info {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2px;
+  margin-bottom: 20px;
+  border: 1px solid #000;
+  font-size: 14px;
+}
+
+.character-info > div {
+  display: contents;
+}
+
+.character-info strong {
+  background-color: #f0f0f0;
+  padding: 4px 8px;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  text-align: left;
+}
+
+.character-info span {
+  padding: 4px 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.character-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 40px;
+  margin-bottom: 20px;
+  max-width: 100%;
+}
+
+.character-info-grid > div {
+  white-space: nowrap;
+}
+
+.character-info-grid .full-width {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+}
+
+.character-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 40px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 2px solid #000;
+  background-color: #fdfdfd;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+}
+
+.character-info-grid > div {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
+}
+
+.character-info-grid strong {
+  display: inline-block;
+  width: 120px;
+  font-weight: bold;
+}
+
+.character-info-grid span {
+  font-weight: normal;
+}
+
+.character-info-grid .full-width {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  border-top: 2px solid #000;
+  padding-top: 8px;
+}
+
+.notes-header {
+  text-align: center;
+  font-size: 20px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-family: 'Georgia', serif;
+  text-decoration: underline;
+}
+
+.notes-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+  border: 2px solid #000;
+  background-color: #f8f8f8;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+}
+
+.ritual-block, .notes-section {
+  width: 100%;
+}
+
+.notes-blocks strong {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.notes-content {
+  white-space: pre-wrap;
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fff;
+  min-height: 60px;
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sheet-logo {
+  width: 438px;
+  height: 172px;
+  object-fit: contain;
+}
+</style>
 </head>
 <body>
 
-<div class="character-info">
+<div class="logo-container">
+  <img src="logo.png" alt="Game Logo" class="sheet-logo">
+</div>
+
+<div class="character-info-grid">
+  <!-- Left column -->
   <div><strong>Name:</strong> <span id="printCharacterName"></span></div>
   <div><strong>Player:</strong> <span id="printPlayerName"></span></div>
   <div><strong>Pronouns:</strong> <span id="printPronouns"></span></div>
-  <div><strong>Lineage:</strong> <span id="printLineage"></span><span id="printSecondLineage"></span></div>
-  <div><strong>Background:</strong> <span id="printBackground">______________</span></div>
+  <div><strong>Lineage:</strong> <span id="printLineage"></span></div>
+  <div><strong>Second Lineage:</strong> <span id="printSecondLineage"></span></div>
+  <div><strong>Background:</strong> <span id="printBackground"></span></div>
   <div><strong>Standing:</strong> <span id="printStanding"></span></div>
-  <div><strong>Class:</strong> <span id="printClass">_______________</span></div>
-  <div><strong>Path:</strong> <span id="printPath">_______________</span></div>
-  <div><strong>Role:</strong> <span id="printRole">_______________</span></div>
-  <div><strong>Diety:</strong> <span id="printDiety"></span></div>
+  <div><strong>Class:</strong> <span id="printClass"></span></div>
+  <div><strong>Path:</strong> <span id="printPath"></span></div>
+  <div><strong>Role:</strong> <span id="printRole"></span></div>
+
+  <!-- Right column -->
+  <div><strong>Deity:</strong> <span id="printDiety"></span></div>
   <div><strong>Element:</strong> <span id="printElement"></span></div>
   <div><strong>Email:</strong> <span id="printEmail"></span></div>
+  <div><strong>Base HP:</strong> <span id="printBaseHP"></span></div>
+  <div><strong>Bonus HP:</strong> <span id="printBonusHP"></span></div>
+  <div><strong>Total HP:</strong> <span id="printTotalHP"></span></div>
+  <div><strong>Progression:</strong> <span id="printProgression"></span></div>
+  <div><strong>Unspent:</strong> <span id="printUnspent"></span></div>
+  <div><strong>Kismet:</strong> <span id="printKismet"></span></div>
+
+  <!-- Languages: spans both columns -->
+  <div class="full-width"><strong>Languages:</strong> <span id="printLanguages"></span></div>
+</div>
+
+<h2 class="notes-header">Notes</h2>
+
+<div class="notes-blocks">
+  <div class="ritual-block">
+    <strong>Rituals:</strong>
+    <div id="printRituals" class="notes-content"></div>
+  </div>
+
+  <div class="notes-section">
+    <strong>Other Notes:</strong>
+    <div id="printOtherNotes" class="notes-content"></div>
+  </div>
 </div>
 
   <div class="section">
