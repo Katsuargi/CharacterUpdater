@@ -679,29 +679,26 @@ function updateLineageOptions(charData = null) {
     }
 
     // Half Blood Logic
-    if (halfBloodCheckbox) {
-        secondLineageContainer.style.display = 'block';
-        document.getElementById('halfBloodSelection1').style.display = 'block';
-        document.getElementById('halfBloodSelection2').style.display = 'block';
+	if (halfBloodCheckbox) {
+		secondLineageContainer.style.display = 'block';
+		document.getElementById('halfBloodSelection1').style.display = 'block';
+		document.getElementById('halfBloodSelection2').style.display = 'block';
+		populateHalfBloodDropdowns(lineage, secondLineageValue);
+	} else {
+		resetDropdown('halfBloodSkillSelect1');
+		resetDropdown('halfBloodSkillSelect2');
 
-        populateHalfBloodDropdowns(lineage, secondLineageValue);
+		// Clear second lineage selection and trigger change to fully reset
+		const secondLineageDropdown = document.getElementById('secondLineageSelect');
+		if (secondLineageDropdown) {
+			secondLineageDropdown.value = '';
+			secondLineageDropdown.dispatchEvent(new Event('change'));
+		}
 
-        setTimeout(() => {
-            const hb1 = document.getElementById('halfBloodSkillSelect1');
-            const hb2 = document.getElementById('halfBloodSkillSelect2');
-            const hbVal1 = charData?.halfBloodSkillSelect1;
-            const hbVal2 = charData?.halfBloodSkillSelect2;
-
-            if (hb1 && hbVal1) {
-                hb1.value = hbVal1;
-                console.log("✅ Assigned half blood skill 1:", hbVal1);
-            }
-            if (hb2 && hbVal2) {
-                hb2.value = hbVal2;
-                console.log("✅ Assigned half blood skill 2:", hbVal2);
-            }
-        }, 50);
-    }
+		secondLineageContainer.style.display = 'none';
+		document.getElementById('halfBloodSelection1').style.display = 'none';
+		document.getElementById('halfBloodSelection2').style.display = 'none';
+	}
 
     // Thin Blood Logic
     if (thinBloodCheckbox) {
@@ -1351,6 +1348,7 @@ function applyCharacterData(charData) {
     }, 100);
 
     console.log("🎉 Character loaded:", charData);
+	handleProgressionChange();
 }
 
 function generateCharacterDataForPrint() {
