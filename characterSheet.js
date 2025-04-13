@@ -46,6 +46,7 @@ function populatePrintableSheet(charData) {
 		Lineage: 'lineageSkills',
 		Craft: 'craftSkills',
 		Unique: 'uniquePowerTableBody',
+		Invocation: 'invocationTable',
 	};
 
 	let treeIndex = 0;
@@ -61,6 +62,9 @@ function populatePrintableSheet(charData) {
 
 		if (isCraft) {
 			tableId = tableMap.Craft;
+		} else if (tree === 'Invocation') {
+			tableId = tableMap.Invocation;
+			document.getElementById('invocationSection').classList.remove('hidden');
 		} else if (tree === 'Universal') {
 			tableId = tableMap.Universal;
 		} else if (tree === 'Unique') {
