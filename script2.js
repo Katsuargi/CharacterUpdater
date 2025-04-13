@@ -338,20 +338,28 @@ function logSkillDetailsAndPopulateOptions(event) {
     }
 
     // Create or get a unique dropdown by ID
-    const getOrCreateDropdown = (id) => {
-        let dropdown = document.getElementById(id);
-        if (!dropdown) {
-            console.log(`Creating new dropdown with ID: ${id}`);
-            dropdown = document.createElement('select');
-            dropdown.id = id;
-            dropdown.className = 'skillSelect2'; // Assign skillSelect2 class
-            document.getElementById('optionsContainer').appendChild(dropdown); // Assuming `optionsContainer` is the parent element
-            createdDropdowns[event.target.id] = dropdown; // Track the created dropdown
-        } else {
-            console.log(`Found existing dropdown with ID: ${id}`);
-        }
-        return dropdown;
-    };
+	const getOrCreateDropdown = (id) => {
+		let dropdown = document.getElementById(id);
+		if (!dropdown) {
+			console.log(`🆕 Creating new dropdown with ID: ${id}`);
+			dropdown = document.createElement('select');
+			dropdown.id = id;
+			dropdown.name = id;
+			dropdown.classList.add('skillSelect', 'skillSelect2');
+
+			// Dynamically assign name like skillSelect4, skillSelect5, etc.
+			const count = document.querySelectorAll('[name^="skillSelect"]').length + 1;
+			dropdown.name = `skillSelect${count}`;
+			console.log(`🛠️ Assigned dynamic name: ${dropdown.name}`);
+
+			document.getElementById('optionsContainer').appendChild(dropdown);
+			createdDropdowns[event.target.id] = dropdown;
+		} else {
+			console.log(`✔️ Found existing dropdown with ID: ${id}`);
+		}
+
+		return dropdown;
+	};
 
     // Populate a dropdown with options
     const populateDropdown = (dropdown, options) => {
@@ -412,6 +420,14 @@ function logSkillDetailsAndPopulateOptions(event) {
 
             const dropdown = getOrCreateDropdown(`skillOptionSelect_${skillTree}_${skillName}`);
             populateDropdown(dropdown, options);
+			// ✅ Reapply saved value from dataset if present
+			if (event.target && event.target.dataset?.savedValue) {
+				const savedValue = event.target.dataset.savedValue;
+				if (dropdown && savedValue) {
+					console.log(`💾 Reapplying saved value "${savedValue}" to ${dropdown.id}`);
+					dropdown.value = savedValue;
+				}
+			}
         } else {
             console.log(`No skill data found for ${skillTree}:${skillName}.`);
         }
@@ -875,11 +891,12 @@ function submitCharacterForm() {
     let data = '';
     const selectedElement = document.getElementById('element').value;
     const selectedClass = document.getElementById('classSelect').value;
-	const classInfo = classes[selectedClass] || {};
-	if (classInfo) {
-    data += `path: ${classInfo.path}\n`;
-    data += `role: ${classInfo.role}\n`;
-}
+    const classInfo = classes[selectedClass] || {};
+    if (classInfo) {
+        data += `path: ${classInfo.path}\n`;
+        data += `role: ${classInfo.role}\n`;
+    }
+
     const lineage = document.getElementById('characterLineage').value;
     const secondLineageValue = document.getElementById('secondLineageSelect').value;
     const halfBloodCheckbox = document.getElementById('halfBloodCheckbox').checked;
@@ -892,25 +909,24 @@ function submitCharacterForm() {
     data += `boughtRitualCount: ${document.getElementById('boughtRitualCount')?.value || '0'}\n`;
 
     // Basic form fields
-	Array.from(form.elements).forEach(element => {
-		if (element.name && element.type !== 'submit') {
-			let value = element.type === 'checkbox' ? (element.checked ? 'Yes' : 'No') : element.value;
-			if (!invalidValues.includes(value)) {
-				let name = element.name;
+    Array.from(form.elements).forEach(element => {
+        if (element.name && element.type !== 'submit') {
+            let value = element.type === 'checkbox' ? (element.checked ? 'Yes' : 'No') : element.value;
+            if (!invalidValues.includes(value)) {
+                let name = element.name;
 
-				// Fix rank naming conflicts
-				if (name.startsWith('rankInput')) {
-					if (element.id.startsWith('craftRankInput')) {
-						name = element.id;
-					} else if (element.id.startsWith('orgRankInput')) {
-						name = element.id;
-					}
-				}
+                if (name.startsWith('rankInput')) {
+                    if (element.id.startsWith('craftRankInput')) {
+                        name = element.id;
+                    } else if (element.id.startsWith('orgRankInput')) {
+                        name = element.id;
+                    }
+                }
 
-				data += `${name}: ${value}\n`;
-			}
-		}
-	});
+                data += `${name}: ${value}\n`;
+            }
+        }
+    });
 
     // All skill dropdowns
     document.querySelectorAll('.skillSelect, .skillSelect2').forEach(select => {
@@ -922,10 +938,24 @@ function submitCharacterForm() {
         }
     });
 
-    // Skill upgrades / option dropdowns
+    // Skill upgrades / option dropdowns as real skills (starting at skillSelect4)
+    let optionSkillIndex = 4;
     document.querySelectorAll('[id^="skillOptionSelect_"]').forEach(select => {
         if (select && select.value && select.value !== 'N/A') {
-            data += `${select.id}: ${select.value}\n`;
+            const [skillTree, skillName] = select.value.split(/:(.+)/);
+            const skillDetails = skillsData[skillTree] && skillsData[skillTree][skillName];
+
+            if (skillDetails) {
+                const match = select.id.match(/^skillOptionSelect_(.+)$/);
+                const source = match ? match[1].replace(/_/g, ' ') : 'Option';
+
+                data += `Skill - ${skillName} (${source}):\n`;
+                data = appendSkillDetails(data, skillDetails, selectedElement);
+
+                data += `skillSelect${optionSkillIndex++}: ${skillTree}:${skillName}\n`;
+            } else {
+                console.warn("⚠️ Skill not found for option select:", select.value);
+            }
         }
     });
 
@@ -959,6 +989,7 @@ function submitCharacterForm() {
     const filename = form.elements['characterName']?.value || 'CharacterSheet';
     downloadToFile(data, `${filename}.txt`, 'text/plain');
 }
+
 
 function processSkillSelection(skillTree, skillName, data, selectedElement) {
     const skillDetails = skillsData[skillTree] && skillsData[skillTree][skillName];
@@ -1161,15 +1192,16 @@ function parseCharacterText(text) {
 function applyCharacterData(charData) {
     const booleanFields = ['halfBloodCheckbox', 'thinBloodCheckbox'];
 
-    Object.entries(charData).forEach(([key, value]) => {
-        const element = document.getElementById(key);
-        if (!element) return;
+	Object.entries(charData).forEach(([key, value]) => {
+		console.log("📦 Checking key/value in charData:", key, value);
+		const element = document.getElementById(key);
+		if (!element) return;
 
-        if (booleanFields.includes(key)) {
-            element.checked = value === 'Yes';
-        } else {
-            element.value = value;
-        }
+		if (booleanFields.includes(key)) {
+			element.checked = value === 'Yes';
+		} else {
+			element.value = value;
+		}
 
 		if (
 			key === 'characterLineage' ||
@@ -1179,21 +1211,27 @@ function applyCharacterData(charData) {
 		) {
 			const before = document.getElementById('thinBloodSkillSelect')?.value;
 			console.log("🟡 BEFORE updateLineageOptions - thinBloodSkillSelect:", before);
-
-			// Add a manual breakpoint if testing in browser dev tools:
-			// debugger;
-
 			updateLineageOptions(charData);
-
 			const after = document.getElementById('thinBloodSkillSelect')?.value;
 			console.log("🔴 AFTER updateLineageOptions - thinBloodSkillSelect:", after);
 		}
 
-        if (key === 'classSelect') {
-            updateClassDetails();
-            updateSkillOptions();
-        }
-    });
+		if (key === 'classSelect') {
+			updateClassDetails();
+			updateSkillOptions();
+		}
+
+		// ✅ Handle dynamically created skill option selects (like skillSelect4+)
+		if (key.startsWith('skillSelect') && !['skillSelect1', 'skillSelect2', 'skillSelect3'].includes(key)) {
+			const select = document.getElementById(key);
+			if (select) {
+				select.value = value;
+				console.log(`✅ Restored dynamic skill dropdown ${key} with value: ${value}`);
+			} else {
+				console.warn(`⚠️ Dropdown ${key} not found during applyCharacterData`);
+			}
+		}
+	});
 
     const bonus = parseInt(charData.bonusProgressionCount || 0);
     const earned = parseInt(charData.earnedProgressionCount || 0);
@@ -1231,30 +1269,30 @@ function applyCharacterData(charData) {
         }, 50);
     }
 
-    Object.entries(charData).forEach(([key, value]) => {
-        if (key.startsWith('skillSelect')) {
-            const el = document.getElementById(key);
-            if (el) {
-                setTimeout(() => {
-                    el.value = value;
-                    el.dispatchEvent(new Event('change'));
-                    logSkillDetailsAndPopulateOptions({ target: el });
-                }, 50);
-            }
-        }
+	Object.entries(charData).forEach(([key, value]) => {
+		if (key.startsWith('skillSelect')) {
+			const el = document.getElementById(key);
+			if (el) {
+				setTimeout(() => {
+					el.value = value;
 
-        if (key.startsWith('skillOptionSelect_')) {
-            const trySet = () => {
-                const dropdown = document.getElementById(key);
-                if (dropdown) {
-                    dropdown.value = value;
-                } else {
-                    console.warn("Dropdown not found at time of assignment:", key);
-                }
-            };
-            setTimeout(trySet, 100);
-        }
+					// ✅ Simple numeric-based logic for next dropdown (like skillSelect4, skillSelect5, etc.)
+					const skillNumberMatch = key.match(/^skillSelect(\d+)$/);
+					if (skillNumberMatch) {
+						const nextSkillNumber = parseInt(skillNumberMatch[1]) + 3; // Adjust if your numbering pattern differs
+						const nextSkillKey = `skillSelect${nextSkillNumber}`;
 
+						if (charData[nextSkillKey]) {
+							el.dataset.savedValue = charData[nextSkillKey];
+							console.log(`✅ Assigned dataset.savedValue on ${key} → ${charData[nextSkillKey]}`);
+						}
+					}
+
+					el.dispatchEvent(new Event('change'));
+					logSkillDetailsAndPopulateOptions({ target: el });
+				}, 50);
+			}
+		}
         // Handle dynamic orgs/crafts
         if (key.startsWith("organizationSelect")) {
             const index = parseInt(key.replace("organizationSelect", ""));
