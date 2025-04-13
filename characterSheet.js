@@ -53,7 +53,7 @@ function populatePrintableSheet(charData) {
 	let treeIndex = 0;
 	const assignedTables = {};
 
-	// Populate normal, universal, craft, unique skills
+		// Populate normal, universal, craft, unique skills
 	parsedSkills.forEach(skillGroup => {
 		const tree = skillGroup.tree;
 		let tableId;
@@ -63,31 +63,38 @@ function populatePrintableSheet(charData) {
 
 		if (isCraft) {
 			tableId = tableMap.Craft;
+			document.getElementById('craftSection')?.classList.remove('hidden');
+			console.log(`🧵 Routed ${skillGroup.name} to Craft`);
 		} else if (tree === 'Invocation') {
 			tableId = tableMap.Invocation;
-			document.getElementById('invocationSection').classList.remove('hidden');
+			document.getElementById('invocationSection')?.classList.remove('hidden');
+			console.log(`💫 Routed ${skillGroup.name} to Invocation`);
 		} else if (tree === 'Universal') {
 			tableId = tableMap.Universal;
+			console.log(`🌍 Routed ${skillGroup.name} to Universal`);
 		} else if (tree === 'Unique') {
 			tableId = tableMap.Unique;
-			document.getElementById('uniquePowerSection').classList.remove('hidden');
-		} 
-		
-			else {
+			document.getElementById('uniquePowerSection')?.classList.remove('hidden');
+			console.log(`🔮 Routed ${skillGroup.name} to Unique`);
+		} else {
 			if (!assignedTables[tree]) {
 				tableId = tableMap[treeIndex++];
 				assignedTables[tree] = tableId;
 
-				const header = document.querySelector(`#${tableId}`).previousElementSibling;
+				const header = document.querySelector(`#${tableId}`)?.previousElementSibling;
 				if (header && header.tagName === 'H2') {
 					header.textContent = tree;
 				}
 			}
 			tableId = assignedTables[tree];
+			console.log(`📦 Routed ${skillGroup.name} to table ${tableId}`);
 		}
 
 		const tbody = document.querySelector(`#${tableId} tbody`);
-		if (!tbody) return;
+		if (!tbody) {
+			console.warn(`⚠️ No tbody found for tableId: ${tableId}`);
+			return;
+		}
 
 		skillGroup.skills.forEach((skill, index) => {
 			const row = document.createElement('tr');
